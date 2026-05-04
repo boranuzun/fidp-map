@@ -23,28 +23,21 @@ export interface Property {
 }
 
 // Fix Leaflet's default icon path issues in Next.js
-const DefaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41]
-});
+const createCustomIcon = (isSelected: boolean) => {
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `
+      <div class="w-8 h-8 flex items-center justify-center border-2 border-black transition-all ${isSelected ? 'bg-black text-white scale-125' : 'bg-white text-black'}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v18Z"/><path d="M6 18h14"/><path d="M6 14h14"/><path d="M6 10h14"/></svg>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
+};
 
-const SelectedIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  tooltipAnchor: [16, -28],
-  shadowSize: [41, 41],
-  className: 'marker-selected'
-});
+const DefaultIcon = createCustomIcon(false);
+const SelectedIcon = createCustomIcon(true);
 
 // Component to handle map view changes with offset for the side drawer
 function MapViewHandler({ center }: { center: [number, number] | null }) {
@@ -52,15 +45,12 @@ function MapViewHandler({ center }: { center: [number, number] | null }) {
   
   useEffect(() => {
     if (center) {
-      // Calculate offset: The sheet is roughly 448px wide (max-w-md).
+      // Calculate offset: The sheet is roughly 440px wide (max-w-md).
       // We want to shift the map center so the pin appears in the middle of the REMAINING space.
-      // This means we shift the map's logical center to the right.
+      // 440px / 2 = 220px
       const zoom = 18;
       const point = map.project(center, zoom);
-      
-      // Shift right by half the sheet width to keep pin centered in visible area
-      // 448px / 2 = 224px
-      const shiftedPoint = L.point(point.x + 224, point.y);
+      const shiftedPoint = L.point(point.x + 220, point.y);
       const shiftedCenter = map.unproject(shiftedPoint, zoom);
 
       map.setView(shiftedCenter, zoom, {
@@ -97,6 +87,7 @@ export default function PropertyMap({
         <TileLayer 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          className="grayscale brightness-95 contrast-105"
         />
         
         <MapViewHandler center={centerPosition} />

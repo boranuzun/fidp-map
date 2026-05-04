@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Input } from './ui/input';
-import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { NativeSelect } from './ui/native-select';
 import { Switch } from './ui/switch';
@@ -92,20 +92,20 @@ export default function DashboardClient({ initialProperties }: { initialProperti
         else listRefs.current.delete(p.id);
       }}
       onClick={() => setSelectedProperty(p)} 
-      className={`p-5 cursor-pointer hover:bg-white transition-all group ${selectedProperty?.id === p.id ? 'bg-white shadow-sm ring-1 ring-inset ring-blue-100' : ''}`}
+      className={`p-6 cursor-pointer border-b border-black/10 transition-colors group ${selectedProperty?.id === p.id ? 'bg-black text-white' : 'hover:bg-black hover:text-white'}`}
     >
-      <h3 className="font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors text-sm">
+      <h3 className="font-black uppercase leading-none text-sm">
         {p.name || p.address}
       </h3>
-      <div className="flex items-start gap-1.5 mt-2 text-slate-500">
+      <div className="flex items-start gap-1.5 mt-2 opacity-60">
         <MapPin className="w-3 h-3 mt-0.5 shrink-0" />
-        <p className="text-[11px] leading-relaxed">{p.address}</p>
+        <p className="text-[10px] font-medium leading-relaxed">{p.address}</p>
       </div>
       {p.localite && !groupByLocalite && (
         <div className="mt-3 flex gap-2">
-          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-slate-200 text-slate-500 font-medium">
+          <div className="text-[9px] px-1.5 py-0.5 border-2 border-current font-bold uppercase">
             {p.localite}
-          </Badge>
+          </div>
         </div>
       )}
     </div>
@@ -113,73 +113,83 @@ export default function DashboardClient({ initialProperties }: { initialProperti
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
-      <header className="h-16 border-b flex items-center px-6 gap-6 bg-white z-10 shrink-0 shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-white" />
+      <header className="h-16 border-b-swiss border-black flex items-center px-6 justify-between bg-white z-20 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-black flex items-center justify-center">
+            <Building2 className="w-6 h-6 text-white" />
           </div>
-          <div className="font-bold text-xl tracking-tight text-slate-900">FIDPMap</div>
+          <div className="font-black text-2xl tracking-tighter text-black uppercase">GENEVA MAP</div>
         </div>
         
-        <div className="flex-1 flex gap-3">
-          <div className="relative max-w-sm flex-1">
-            <Input 
-              placeholder="Search properties..." 
-              value={search} 
-              onChange={(e) => setSearch(e.target.value)} 
-              className="h-10 pl-3 bg-slate-50 border-slate-200 focus:bg-white transition-colors" 
+        <div className="flex items-center gap-6">
+          <div className="flex items-center space-x-3">
+            <Switch 
+              id="group-by-localite" 
+              checked={groupByLocalite} 
+              onCheckedChange={setGroupByLocalite} 
             />
+            <Label htmlFor="group-by-localite" className="text-[10px] font-bold uppercase tracking-widest text-black cursor-pointer">
+              GROUP BY LOCALITÉ
+            </Label>
           </div>
-          <NativeSelect 
-            value={selectedLocalite} 
-            onChange={(e) => setSelectedLocalite(e.target.value)} 
-            className="h-10 min-w-[160px] bg-slate-50 border-slate-200"
-          >
-             <option value="all">All Localités</option>
-             {localites.sort().map((l) => <option key={l} value={l}>{l}</option>)}
-          </NativeSelect>
-          <NativeSelect 
-            value={selectedFondation} 
-            onChange={(e) => setSelectedFondation(e.target.value)} 
-            className="h-10 min-w-[160px] bg-slate-50 border-slate-200"
-          >
-             <option value="all">All Fondations</option>
-             {fondations.sort().map((f) => <option key={f} value={f}>{f}</option>)}
-          </NativeSelect>
+          
+          <div className="bg-black text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
+            {filtered.length} PROPERTIES
+          </div>
         </div>
-
-        <div className="flex items-center space-x-2 border-l pl-6">
-          <Switch 
-            id="group-by-localite" 
-            checked={groupByLocalite} 
-            onCheckedChange={setGroupByLocalite} 
-          />
-          <Label htmlFor="group-by-localite" className="text-xs font-medium text-slate-600 cursor-pointer">
-            Group by Localité
-          </Label>
-        </div>
-        
-        <Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-700 border-blue-100 font-semibold">
-          {filtered.length} properties
-        </Badge>
       </header>
 
+      <div className="h-14 border-b-swiss border-black flex items-center px-6 gap-4 bg-white z-10 shrink-0">
+        <div className="relative flex-1 max-w-md">
+          <Input 
+            placeholder="SEARCH PROPERTIES..." 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)} 
+            className="h-10 border-swiss border-black bg-white focus:ring-0 px-4 font-black placeholder:text-black/30" 
+          />
+        </div>
+        <NativeSelect 
+          value={selectedLocalite} 
+          onChange={(e) => setSelectedLocalite(e.target.value)} 
+          className="h-10 min-w-[180px] border-swiss border-black bg-white uppercase font-black"
+        >
+           <option value="all">ALL LOCALITÉS</option>
+           {localites.sort().map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+        </NativeSelect>
+        <NativeSelect 
+          value={selectedFondation} 
+          onChange={(e) => setSelectedFondation(e.target.value)} 
+          className="h-10 min-w-[180px] border-swiss border-black bg-white uppercase font-black"
+        >
+           <option value="all">ALL FONDATIONS</option>
+           {fondations.sort().map((f) => <option key={f} value={f}>{f.toUpperCase()}</option>)}
+        </NativeSelect>
+        <Button className="h-10 px-6 bg-black text-white font-black uppercase tracking-widest hover:bg-black/90 transition-none">
+          REFINE RESULTS
+        </Button>
+      </div>
+
       <div className="flex-1 flex overflow-hidden">
-        <aside className="w-80 overflow-y-auto border-r bg-slate-50/50">
+        <aside className="w-80 overflow-y-auto border-r-swiss border-black bg-white z-30">
+          <div className="p-6 border-b-swiss border-black">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
+              Filtered Results ({filtered.length})
+            </h2>
+          </div>
           {filtered.length > 0 ? (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-black/10">
               {Object.entries(groupedProperties).map(([groupName, groupItems]) => (
                 <div key={groupName}>
                   {groupByLocalite && (
-                    <div className="bg-slate-100/80 px-5 py-2 sticky top-0 z-10 border-b border-slate-200 flex items-center gap-2">
-                      <Layers className="w-3 h-3 text-slate-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{groupName}</span>
-                      <Badge variant="outline" className="ml-auto text-[10px] h-4 px-1 bg-white/50 border-slate-200 text-slate-400">
+                    <div className="bg-slate-50 px-5 py-2 sticky top-0 z-10 border-b-swiss border-black flex items-center gap-2">
+                      <Layers className="w-3 h-3 opacity-30" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{groupName}</span>
+                      <div className="ml-auto text-[10px] font-black px-1 border-2 border-black/20">
                         {groupItems.length}
-                      </Badge>
+                      </div>
                     </div>
                   )}
-                  <div className="divide-y divide-slate-100">
+                  <div className="divide-y divide-black/10">
                     {groupItems.map(renderPropertyCard)}
                   </div>
                 </div>
@@ -205,56 +215,56 @@ export default function DashboardClient({ initialProperties }: { initialProperti
       </div>
 
       <Sheet modal={false} open={!!selectedProperty} onOpenChange={(open) => !open && setSelectedProperty(null)}>
-        <SheetContent side="right" className="sm:max-w-md p-0 gap-0 border-l-0 shadow-2xl">
+        <SheetContent side="right" className="sm:max-w-md p-0 gap-0 border-l-[3px] border-black shadow-none mt-16 !h-[calc(100vh-4rem)]">
           <SheetDescription className="sr-only">
             Details and information about the selected property.
           </SheetDescription>
-          <div className="h-full flex flex-col">
-            <div className="relative h-64 bg-slate-900 shrink-0">
+          <div className="h-full flex flex-col bg-white">
+            <div className="relative h-72 bg-black shrink-0">
               {selectedProperty?.image_url ? (
                 <Image 
                   src={selectedProperty.image_url} 
                   alt={selectedProperty.name || selectedProperty.address} 
                   fill
                   unoptimized
-                  className="w-full h-full object-cover opacity-90"
+                  className="w-full h-full object-cover grayscale opacity-80"
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 bg-slate-100">
+                <div className="w-full h-full flex flex-col items-center justify-center text-white bg-black">
                   <Building2 className="w-12 h-12 mb-2 opacity-20" />
-                  <span className="text-xs font-medium opacity-40">No photo available</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40">No photo available</span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-8 left-8 right-8 text-white">
                 <SheetHeader className="p-0 space-y-0">
-                  <SheetTitle className="text-2xl font-bold leading-tight drop-shadow-md text-white">
+                  <SheetTitle className="text-4xl font-black uppercase tracking-tighter leading-none text-white">
                     {selectedProperty?.name || selectedProperty?.address}
                   </SheetTitle>
                 </SheetHeader>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8">
-              <div className="space-y-8">
+            <div className="flex-1 overflow-y-auto p-10">
+              <div className="space-y-12">
                 <section>
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                    <MapPin className="w-3 h-3" /> Location Details
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-black mb-6 border-b-swiss border-black pb-2 flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5" /> Location Details
                   </h4>
-                  <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 space-y-4">
+                  <div className="space-y-6">
                     <div>
-                      <p className="text-xs text-slate-400 mb-1">Full Address</p>
-                      <p className="text-sm font-medium text-slate-700 leading-relaxed">{selectedProperty?.address}</p>
+                      <p className="text-[9px] font-bold uppercase opacity-40 mb-1">Full Address</p>
+                      <p className="text-base font-black leading-tight">{selectedProperty?.address}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/50">
+                    <div className="grid grid-cols-2 gap-6 pt-6 border-t border-black/10">
                       <div>
-                        <p className="text-xs text-slate-400 mb-1">Localité</p>
-                        <p className="text-sm font-bold text-slate-900">{selectedProperty?.localite || 'N/A'}</p>
+                        <p className="text-[9px] font-bold uppercase opacity-40 mb-1">Localité</p>
+                        <p className="text-sm font-black uppercase">{selectedProperty?.localite || 'N/A'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-400 mb-1">Units</p>
-                        <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
-                          <Users className="w-3.5 h-3.5 text-blue-500" />
+                        <p className="text-[9px] font-bold uppercase opacity-40 mb-1">Units</p>
+                        <div className="flex items-center gap-1.5 text-sm font-black uppercase">
+                          <Users className="w-4 h-4" />
                           {selectedProperty?.units || 'Unknown'}
                         </div>
                       </div>
@@ -263,31 +273,31 @@ export default function DashboardClient({ initialProperties }: { initialProperti
                 </section>
 
                 <section>
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-                    <Landmark className="w-3 h-3" /> Management
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-black mb-6 border-b-swiss border-black pb-2 flex items-center gap-2">
+                    <Landmark className="w-3.5 h-3.5" /> Management
                   </h4>
                   <div className="grid gap-4">
-                    <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
-                      <span className="text-xs text-slate-500">Fondation</span>
-                      <span className="text-sm font-bold text-blue-600">{selectedProperty?.fondation || 'N/A'}</span>
+                    <div className="flex items-center justify-between p-5 border-swiss border-black">
+                      <span className="text-[10px] font-bold uppercase opacity-40">Fondation</span>
+                      <span className="text-sm font-black uppercase">{selectedProperty?.fondation || 'N/A'}</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
-                      <span className="text-xs text-slate-500">Group</span>
-                      <span className="text-sm font-bold text-slate-900">{selectedProperty?.group || 'N/A'}</span>
+                    <div className="flex items-center justify-between p-5 border-swiss border-black">
+                      <span className="text-[10px] font-bold uppercase opacity-40">Group</span>
+                      <span className="text-sm font-black uppercase">{selectedProperty?.group || 'N/A'}</span>
                     </div>
                   </div>
                 </section>
               </div>
             </div>
 
-            <div className="p-6 border-t bg-slate-50/50">
+            <div className="p-8 border-t-swiss border-black bg-white">
               <a 
                 href={selectedProperty?.url} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
+                className="flex items-center justify-center w-full bg-black text-white font-black py-5 uppercase tracking-[0.2em] text-xs hover:bg-slate-900 transition-colors"
               >
-                View Details on Official Site
+                Visit Official Site
               </a>
             </div>
           </div>
