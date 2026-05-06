@@ -94,7 +94,7 @@ const parseGeometry = (geometryStr?: string | null): [number, number][] | null =
     if (geo.type === 'Polygon' && Array.isArray(geo.coordinates)) {
       // Leaflet's Polygon component expects [lat, lon] order.
       // GeoJSON standard (your data) is [lon, lat]. We must swap them for Leaflet.
-      return geo.coordinates[0].map(([lon, lat]) => [lat, lon]) as [number, number][];
+      return geo.coordinates[0].map(([lon, lat]: [number, number]) => [lat, lon]) as [number, number][];
     }
   } catch (e) {
     console.error("Failed to parse geometry", e);

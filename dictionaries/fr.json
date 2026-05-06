@@ -1,0 +1,19 @@
+{
+  "common": {
+    "title": "GENEVA MAP",
+    "about": "À propos"
+  },
+  "dashboard": {
+    "searchPlaceholder": "RECHERCHER DES PROPRIÉTÉS...",
+    "groupByLocalite": "GROUPER PAR LOCALITÉ",
+    "propertiesCount": "{count} PROPRIÉTÉS",
+    "resetFilters": "RÉINITIALISER LES FILTRES",
+    "localites": "LOCALITÉS",
+    "fondations": "FONDATIONS",
+    "allLocalites": "TOUTES LES LOCALITÉS",
+    "allFondations": "TOUTES LES FONDATIONS",
+    "filteredResults": "Résultats filtrés ({count})",
+    "noMatch": "Aucune propriété ne correspond à vos filtres.",
+    "visitSite": "Visiter le site officiel"
+  }
+}
