@@ -30,7 +30,7 @@ export default async function RootLayout(props: {
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, inter.variable)}
     >
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

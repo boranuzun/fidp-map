@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react"
 import DashboardClient from "../DashboardClient"
 import { vi, describe, it, expect } from "vitest"
 import { type Property } from "../PropertyMap"
+import dict from "../../dictionaries/en.json"
 
 // Mock PropertyMap to avoid Leaflet issues in JSDOM
 vi.mock("../PropertyMap", () => ({
@@ -37,10 +38,10 @@ const mockProperties: Property[] = [
 
 describe('DashboardClient', () => {
   it('resets all filters when clicking RESET FILTERS', async () => {
-    render(<DashboardClient initialProperties={mockProperties} />);
+    render(<DashboardClient initialProperties={mockProperties} dict={dict} />);
 
     // 1. Set some filters
-    const searchInput = screen.getByPlaceholderText('SEARCH PROPERTIES...');
+    const searchInput = screen.getByPlaceholderText(dict.dashboard.searchPlaceholder);
     fireEvent.change(searchInput, { target: { value: 'Property A' } });
     
     // Verify search filtered results
@@ -48,12 +49,12 @@ describe('DashboardClient', () => {
     expect(screen.queryByText('Property B')).not.toBeInTheDocument();
 
     // Toggle "Group by Localité"
-    const groupBySwitch = screen.getByLabelText('GROUP BY LOCALITÉ');
+    const groupBySwitch = screen.getByLabelText(dict.dashboard.groupByLocalite);
     fireEvent.click(groupBySwitch);
     expect(groupBySwitch).toHaveAttribute('aria-checked', 'true');
 
     // 2. Click RESET FILTERS
-    const resetButton = screen.getByRole('button', { name: /RESET FILTERS/i });
+    const resetButton = screen.getByRole('button', { name: new RegExp(dict.dashboard.resetFilters, 'i') });
     fireEvent.click(resetButton);
 
     // 3. Verify everything is reset
@@ -62,7 +63,13 @@ describe('DashboardClient', () => {
     expect(groupBySwitch).toHaveAttribute('aria-checked', 'false');
     
     // Verify multi-selects are reset (they show "ALL [Label]" when all options are selected)
-    expect(screen.getByText('ALL LOCALITÉS')).toBeInTheDocument();
-    expect(screen.getByText('ALL FONDATIONS')).toBeInTheDocument();
+    expect(screen.getByText(dict.dashboard.allLocalites)).toBeInTheDocument();
+    expect(screen.getByText(dict.dashboard.allFondations)).toBeInTheDocument();
+  });
+
+  it('renders a locale-aware "About" link', () => {
+    render(<DashboardClient initialProperties={mockProperties} dict={dict} />);
+    const aboutLink = screen.getByTitle(dict.common.about);
+    expect(aboutLink).toHaveAttribute('href', '/en/about');
   });
 });

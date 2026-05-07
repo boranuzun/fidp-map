@@ -4,8 +4,10 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import Image from "next/image"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
+import LanguageSwitcher from "./ui/language-switcher"
 import {
   Sheet,
   SheetContent,
@@ -19,7 +21,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  } from './ui/carousel';
+} from "./ui/carousel"
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog"
 import { MultiSelectCombobox } from "./ui/multi-select-combobox"
 import { Switch } from "./ui/switch"
@@ -35,29 +37,72 @@ import {
   Calendar,
   Hash,
 } from "lucide-react"
+import logo from "../public/fidp-logo.webp"
+
+const MapPlaceholder = () => {
+  const params = useParams()
+  const lang = params?.lang as string
+  const loadingText = lang === "fr" ? "Chargement de la carte..." : "Loading Map..."
+
+  return (
+    <div className="flex h-full w-full animate-pulse items-center justify-center bg-slate-100 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+      {loadingText}
+    </div>
+  )
+}
 
 const PropertyMap = dynamic(() => import("./PropertyMap"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full animate-pulse items-center justify-center bg-slate-100 text-slate-400">
-      Loading Map...
-    </div>
-  ),
+  loading: MapPlaceholder,
 })
 
 const prefetchImages = (images?: string[] | null) => {
-  if (!images || images.length === 0) return;
+  if (!images || images.length === 0) return
   images.forEach((url) => {
-    const img = new globalThis.Image();
-    img.src = url;
-  });
-};
+    const img = new globalThis.Image()
+    img.src = url
+  })
+}
+
+interface DashboardClientProps {
+  initialProperties: Property[]
+  dict: {
+    common: {
+      title: string
+      about: string
+    }
+    dashboard: {
+      allProperties: string
+      unknownLocalite: string
+      searchPlaceholder: string
+      localites: string
+      allLocalites: string
+      fondations: string
+      allFondations: string
+      resetFilters: string
+      filteredResults: string
+      noMatch: string
+      visitSite: string
+      groupByLocalite: string
+      propertiesCount: string
+    }
+    details: Record<string, string>
+    map: {
+      grayscale: string
+      color: string
+      properties: string
+      buildingLayouts: string
+    }
+  }
+}
 
 export default function DashboardClient({
   initialProperties,
-}: {
-  initialProperties: Property[]
-}) {
+  dict,
+}: DashboardClientProps) {
+  const params = useParams()
+  const lang = params?.lang as string
+
   const allLocalites = useMemo(
     () =>
       Array.from(
@@ -83,10 +128,10 @@ export default function DashboardClient({
     null
   )
   const [groupByLocalite, setGroupByLocalite] = useState(false)
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [fullScreenIndex, setFullScreenIndex] = useState(0);
+  const [isFullScreen, setIsFullScreen] = useState(false)
+  const [fullScreenIndex, setFullScreenIndex] = useState(0)
 
-  const listRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const listRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   const resetFilters = () => {
     setSearch("")
@@ -94,6 +139,11 @@ export default function DashboardClient({
     setSelectedFondations(allFondations)
     setGroupByLocalite(false)
   }
+
+  const isFiltered = 
+    search !== "" || 
+    selectedLocalites.length !== allLocalites.length || 
+    selectedFondations.length !== allFondations.length;
 
   const properties = initialProperties
 
@@ -128,11 +178,11 @@ export default function DashboardClient({
   }, [search, selectedLocalites, selectedFondations, properties])
 
   const groupedProperties = useMemo(() => {
-    if (!groupByLocalite) return { "All Properties": filtered }
+    if (!groupByLocalite) return { [dict.dashboard.allProperties]: filtered }
 
     const groups: Record<string, Property[]> = {}
     filtered.forEach((p) => {
-      const key = p.localite || "Unknown"
+      const key = p.localite || dict.dashboard.unknownLocalite
       if (!groups[key]) groups[key] = []
       groups[key].push(p)
     })
@@ -141,7 +191,7 @@ export default function DashboardClient({
     return Object.fromEntries(
       Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
     )
-  }, [filtered, groupByLocalite])
+  }, [filtered, groupByLocalite, dict.dashboard.allProperties, dict.dashboard.unknownLocalite])
 
   const renderPropertyCard = (p: Property) => (
     <div
@@ -174,12 +224,18 @@ export default function DashboardClient({
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="border-b-swiss z-20 flex h-16 shrink-0 items-center justify-between border-black bg-white px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center bg-black">
-            <Building2 className="h-6 w-6 text-white" />
+        <div className="flex items-center gap-4">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden relative">
+            <Image
+              src={logo}
+              alt="FIDP Logo"
+              fill
+              className="object-contain p-1"
+              unoptimized
+            />
           </div>
           <div className="text-2xl font-black tracking-tighter text-black uppercase">
-            GENEVA MAP
+            {dict.common.title}
           </div>
         </div>
 
@@ -194,18 +250,16 @@ export default function DashboardClient({
               htmlFor="group-by-localite"
               className="cursor-pointer text-[10px] font-bold tracking-widest text-black uppercase"
             >
-              GROUP BY LOCALITÉ
+              {dict.dashboard.groupByLocalite}
             </Label>
           </div>
 
-          <div className="bg-black px-3 py-1 text-[10px] font-bold tracking-widest text-white uppercase">
-            {filtered.length} PROPERTIES
-          </div>
+          <LanguageSwitcher dict={dict} currentLang={lang} />
 
           <Link
-            href="/about"
+            href={`/${lang}/about`}
             className="flex size-8 items-center justify-center border-2 border-black font-black transition-colors hover:bg-black hover:text-white"
-            title="À propos"
+            title={dict.common.about}
           >
             ?
           </Link>
@@ -215,7 +269,7 @@ export default function DashboardClient({
       <div className="border-b-swiss z-10 flex h-14 shrink-0 items-center gap-4 border-black bg-white px-6">
         <div className="relative max-w-md flex-1">
           <Input
-            placeholder="SEARCH PROPERTIES..."
+            placeholder={dict.dashboard.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border-swiss h-10 border-black bg-white px-4 font-black placeholder:text-black/30 focus:ring-0"
@@ -225,8 +279,8 @@ export default function DashboardClient({
           options={allLocalites}
           selected={selectedLocalites}
           onChange={setSelectedLocalites}
-          placeholder="LOCALITÉS"
-          allLabel="ALL LOCALITÉS"
+          placeholder={dict.dashboard.localites}
+          allLabel={dict.dashboard.allLocalites}
           icon={MapPin}
           className="min-w-[200px]"
         />
@@ -234,25 +288,29 @@ export default function DashboardClient({
           options={allFondations}
           selected={selectedFondations}
           onChange={setSelectedFondations}
-          placeholder="FONDATIONS"
-          allLabel="ALL FONDATIONS"
+          placeholder={dict.dashboard.fondations}
+          allLabel={dict.dashboard.allFondations}
           icon={Building2}
           className="min-w-[200px]"
         />
         <Button
           onClick={resetFilters}
-          className="h-10 bg-black px-6 font-black tracking-widest text-white uppercase transition-none hover:bg-black/90"
+          disabled={!isFiltered}
+          className="h-10 bg-black px-6 font-black tracking-widest text-white uppercase transition-none hover:bg-black/90 disabled:bg-black/20 disabled:cursor-not-allowed"
         >
-          RESET FILTERS
+          {dict.dashboard.resetFilters}
         </Button>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         <aside className="border-r-swiss z-30 w-80 overflow-y-auto border-black bg-white">
-          <div className="border-b-swiss border-black p-6">
-            <h2 className="text-[10px] font-black tracking-[0.2em] uppercase opacity-40">
-              Filtered Results ({filtered.length})
-            </h2>
+          <div className="border-b-swiss flex h-12 items-center border-black bg-slate-50 px-6">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-black animate-pulse" />
+              <h2 className="text-[10px] font-black tracking-[0.3em] uppercase">
+                {filtered.length} {dict.dashboard.propertiesCount.split('{count}')[1].trim() || 'RESULTS'}
+              </h2>
+            </div>
           </div>
           {filtered.length > 0 ? (
             <div className="divide-y divide-black/10">
@@ -283,7 +341,7 @@ export default function DashboardClient({
                 <Globe className="h-6 w-6 text-slate-300" />
               </div>
               <p className="text-sm font-medium text-balance text-slate-500">
-                No properties match your filters.
+                {dict.dashboard.noMatch}
               </p>
             </div>
           )}
@@ -295,185 +353,197 @@ export default function DashboardClient({
             onSelect={setSelectedProperty}
             selectedProperty={selectedProperty}
             onHover={(p) => prefetchImages(p.images)}
+            dict={dict.map}
           />
+
+          <Sheet
+            modal={false}
+            open={!!selectedProperty}
+            onOpenChange={(open) => {
+              if (!open && !isFullScreen) {
+                setSelectedProperty(null)
+              }
+            }}
+          >
+            <SheetContent
+              side="right"
+              portal={false}
+              className="absolute inset-y-0 right-0 z-30 h-full gap-0 border-l-[3px] border-black p-0 shadow-none sm:max-w-md"
+            >
+              <SheetDescription className="sr-only">
+                Details and information about the selected property.
+              </SheetDescription>
+              <div className="flex h-full flex-col bg-white">
+                <div className="group/carousel relative h-72 shrink-0 overflow-hidden bg-black">
+                  {selectedProperty?.images &&
+                  selectedProperty.images.length > 0 ? (
+                    <Carousel className="h-full w-full" opts={{ loop: true }}>
+                      <CarouselContent className="ml-0 h-72">
+                        {selectedProperty.images.map((img, index) => (
+                          <CarouselItem
+                            key={img}
+                            className="relative h-full cursor-zoom-in pl-0"
+                            onClick={() => {
+                              setFullScreenIndex(index)
+                              setIsFullScreen(true)
+                            }}
+                          >
+                            <Image
+                              src={img}
+                              alt={`${selectedProperty.name || selectedProperty.address} - Photo ${index + 1}`}
+                              fill
+                              unoptimized
+                              className="h-full w-full object-cover opacity-90 transition-opacity hover:opacity-100"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      {selectedProperty.images.length > 1 && (
+                        <>
+                          <CarouselPrevious className="left-2 opacity-0 transition-opacity group-hover/carousel:opacity-100" />
+                          <CarouselNext className="right-2 opacity-0 transition-opacity group-hover/carousel:opacity-100" />
+                        </>
+                      )}
+                    </Carousel>
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-black text-white">
+                      <Building2 className="mb-2 h-12 w-12 opacity-20" />
+                      <span className="text-[10px] font-black tracking-widest uppercase opacity-40">
+                        {dict.details.noPhoto}
+                      </span>
+                    </div>
+                  )}
+                  <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
+                  <div className="pointer-events-none absolute right-8 bottom-8 left-8 text-white">
+                    <SheetHeader className="space-y-0 p-0">
+                      <SheetTitle className="text-4xl leading-none font-black tracking-tighter text-white uppercase">
+                        {selectedProperty?.name || selectedProperty?.address}
+                      </SheetTitle>
+                    </SheetHeader>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-10">
+                  <div className="space-y-12">
+                    <section>
+                      <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
+                        <MapPin className="h-3.5 w-3.5" />{" "}
+                        {dict.details.locationDetails}
+                      </h4>
+                      <div className="space-y-6">
+                        <div>
+                          <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
+                            {dict.details.fullAddress}
+                          </p>
+                          <p className="text-base leading-tight font-black">
+                            {selectedProperty?.address}
+                            {selectedProperty?.zip && (
+                              <span className="ml-2 font-medium tracking-tight opacity-40">
+                                ({selectedProperty.zip})
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6 border-t border-black/10 pt-6">
+                          <div>
+                            <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
+                              {dict.details.localite}
+                            </p>
+                            <p className="text-sm font-black uppercase">
+                              {selectedProperty?.localite ||
+                                dict.details.notAvailable}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
+                              {dict.details.units}
+                            </p>
+                            <div className="flex items-center gap-1.5 text-sm font-black uppercase">
+                              <Users className="h-4 w-4" />
+                              {selectedProperty?.units || dict.details.unknown}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
+                        <Landmark className="h-3.5 w-3.5" />{" "}
+                        {dict.details.mgmtHistory}
+                      </h4>
+                      <div className="grid gap-4">
+                        <div className="border-swiss flex items-center justify-between border-black p-5">
+                          <span className="text-[10px] font-bold uppercase opacity-40">
+                            {dict.details.fondation}
+                          </span>
+                          <span className="text-sm font-black uppercase">
+                            {selectedProperty?.fondation ||
+                              dict.details.notAvailable}
+                          </span>
+                        </div>
+                        {selectedProperty?.construction_year && (
+                          <div className="border-swiss flex items-center justify-between border-black p-5">
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase opacity-40">
+                              <Calendar className="h-3 w-3" />{" "}
+                              {dict.details.construction}
+                            </span>
+                            <span className="text-sm font-black uppercase">
+                              {dict.details.builtIn.replace(
+                                "{year}",
+                                selectedProperty.construction_year.toString()
+                              )}
+                            </span>
+                          </div>
+                        )}
+                        <div className="border-swiss flex items-center justify-between border-black p-5">
+                          <span className="text-[10px] font-bold uppercase opacity-40">
+                            {dict.details.group}
+                          </span>
+                          <span className="text-sm font-black uppercase">
+                            {selectedProperty?.group ||
+                              dict.details.notAvailable}
+                          </span>
+                        </div>
+                      </div>
+                    </section>
+
+                    {selectedProperty?.tags &&
+                      selectedProperty.tags.length > 0 && (
+                        <section>
+                          <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
+                            <Hash className="h-3.5 w-3.5" /> {dict.details.tags}
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedProperty.tags.map((tag) => (
+                              <div
+                                key={tag}
+                                className="bg-black px-2 py-1 text-[9px] font-black tracking-wider text-white uppercase"
+                              >
+                                {tag}
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      )}
+                  </div>
+                </div>
+
+                <div className="border-t-swiss border-black bg-white p-8">
+                  <a
+                    href={selectedProperty?.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center bg-black py-5 text-xs font-black tracking-[0.2em] text-white uppercase transition-colors hover:bg-slate-900"
+                  >
+                    {dict.dashboard.visitSite}
+                  </a>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </main>
       </div>
-
-      <Sheet
-        modal={false}
-        open={!!selectedProperty}
-        onOpenChange={(open) => {
-          if (!open && !isFullScreen) {
-            setSelectedProperty(null)
-          }
-        }}
-      >
-        <SheetContent
-          side="right"
-          className="mt-16 h-[calc(100vh-4rem)] gap-0 border-l-[3px] border-black p-0 shadow-none sm:max-w-md"
-        >
-          <SheetDescription className="sr-only">
-            Details and information about the selected property.
-          </SheetDescription>
-          <div className="flex h-full flex-col bg-white">
-            <div className="group/carousel relative h-72 shrink-0 overflow-hidden bg-black">
-              {selectedProperty?.images &&
-              selectedProperty.images.length > 0 ? (
-                <Carousel className="h-full w-full" opts={{ loop: true }}>
-                  <CarouselContent className="ml-0 h-72">
-                    {selectedProperty.images.map((img, index) => (
-                      <CarouselItem
-                        key={img}
-                        className="relative h-full cursor-zoom-in pl-0"
-                        onClick={() => {
-                          setFullScreenIndex(index)
-                          setIsFullScreen(true)
-                        }}
-                      >
-                        <Image
-                          src={img}
-                          alt={`${selectedProperty.name || selectedProperty.address} - Photo ${index + 1}`}
-                          fill
-                          unoptimized
-                          className="h-full w-full object-cover opacity-90 transition-opacity hover:opacity-100"
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  {selectedProperty.images.length > 1 && (
-                    <>
-                      <CarouselPrevious className="left-2 opacity-0 transition-opacity group-hover/carousel:opacity-100" />
-                      <CarouselNext className="right-2 opacity-0 transition-opacity group-hover/carousel:opacity-100" />
-                    </>
-                  )}
-                </Carousel>
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center bg-black text-white">
-                  <Building2 className="mb-2 h-12 w-12 opacity-20" />
-                  <span className="text-[10px] font-black tracking-widest uppercase opacity-40">
-                    No photo available
-                  </span>
-                </div>
-              )}
-              <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
-              <div className="pointer-events-none absolute right-8 bottom-8 left-8 text-white">
-                <SheetHeader className="space-y-0 p-0">
-                  <SheetTitle className="text-4xl leading-none font-black tracking-tighter text-white uppercase">
-                    {selectedProperty?.name || selectedProperty?.address}
-                  </SheetTitle>
-                </SheetHeader>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-10">
-              <div className="space-y-12">
-                <section>
-                  <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
-                    <MapPin className="h-3.5 w-3.5" /> Location Details
-                  </h4>
-                  <div className="space-y-6">
-                    <div>
-                      <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
-                        Full Address
-                      </p>
-                      <p className="text-base leading-tight font-black">
-                        {selectedProperty?.address}
-                        {selectedProperty?.zip && (
-                          <span className="ml-2 font-medium tracking-tight opacity-40">
-                            ({selectedProperty.zip})
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-6 border-t border-black/10 pt-6">
-                      <div>
-                        <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
-                          Localité
-                        </p>
-                        <p className="text-sm font-black uppercase">
-                          {selectedProperty?.localite || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
-                          Units
-                        </p>
-                        <div className="flex items-center gap-1.5 text-sm font-black uppercase">
-                          <Users className="h-4 w-4" />
-                          {selectedProperty?.units || "Unknown"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section>
-                  <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
-                    <Landmark className="h-3.5 w-3.5" /> Management & History
-                  </h4>
-                  <div className="grid gap-4">
-                    <div className="border-swiss flex items-center justify-between border-black p-5">
-                      <span className="text-[10px] font-bold uppercase opacity-40">
-                        Fondation
-                      </span>
-                      <span className="text-sm font-black uppercase">
-                        {selectedProperty?.fondation || "N/A"}
-                      </span>
-                    </div>
-                    {selectedProperty?.construction_year && (
-                      <div className="border-swiss flex items-center justify-between border-black p-5">
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase opacity-40">
-                          <Calendar className="h-3 w-3" /> Construction
-                        </span>
-                        <span className="text-sm font-black uppercase">
-                          Built in {selectedProperty.construction_year}
-                        </span>
-                      </div>
-                    )}
-                    <div className="border-swiss flex items-center justify-between border-black p-5">
-                      <span className="text-[10px] font-bold uppercase opacity-40">
-                        Group
-                      </span>
-                      <span className="text-sm font-black uppercase">
-                        {selectedProperty?.group || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </section>
-
-                {selectedProperty?.tags && selectedProperty.tags.length > 0 && (
-                  <section>
-                    <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
-                      <Hash className="h-3.5 w-3.5" /> Tags
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProperty.tags.map((tag) => (
-                        <div
-                          key={tag}
-                          className="bg-black px-2 py-1 text-[9px] font-black tracking-wider text-white uppercase"
-                        >
-                          {tag}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t-swiss border-black bg-white p-8">
-              <a
-                href={selectedProperty?.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center bg-black py-5 text-xs font-black tracking-[0.2em] text-white uppercase transition-colors hover:bg-slate-900"
-              >
-                Visit Official Site
-              </a>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
 
       <Dialog open={isFullScreen} onOpenChange={setIsFullScreen}>
         <DialogContent
@@ -526,12 +596,12 @@ export default function DashboardClient({
                 </Carousel>
                 {/* Close Button Hint */}
                 <div className="absolute top-4 right-16 z-2010 text-[10px] font-black tracking-widest text-white/40 uppercase">
-                  ESC TO CLOSE
+                  {dict.details.escToClose}
                 </div>
               </div>
             ) : (
               <div className="font-black tracking-widest text-white uppercase">
-                No images available for this property.
+                {dict.details.noPhoto}
               </div>
             )
           ) : (

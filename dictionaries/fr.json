@@ -1,9 +1,13 @@
 {
   "common": {
-    "title": "GENEVA MAP",
-    "about": "À propos"
+    "title": "FIDP MAP",
+    "about": "À propos",
+    "language": "Langue",
+    "french": "Français",
+    "english": "English"
   },
   "dashboard": {
+    "loadingMap": "Chargement de la carte...",
     "searchPlaceholder": "RECHERCHER DES PROPRIÉTÉS...",
     "groupByLocalite": "GROUPER PAR LOCALITÉ",
     "propertiesCount": "{count} PROPRIÉTÉS",
@@ -12,8 +16,41 @@
     "fondations": "FONDATIONS",
     "allLocalites": "TOUTES LES LOCALITÉS",
     "allFondations": "TOUTES LES FONDATIONS",
+    "allProperties": "Toutes les propriétés",
+    "unknownLocalite": "Inconnu",
     "filteredResults": "Résultats filtrés ({count})",
     "noMatch": "Aucune propriété ne correspond à vos filtres.",
     "visitSite": "Visiter le site officiel"
+  },
+  "details": {
+    "noPhoto": "Aucune photo disponible",
+    "locationDetails": "Détails de l'emplacement",
+    "fullAddress": "Adresse complète",
+    "localite": "Localité",
+    "notAvailable": "N/A",
+    "units": "Unités",
+    "unknown": "Inconnu",
+    "mgmtHistory": "Gestion & Histoire",
+    "fondation": "Fondation",
+    "construction": "Construction",
+    "builtIn": "Construit en {year}",
+    "group": "Groupe",
+    "tags": "Tags",
+    "escToClose": "ESC POUR FERMER"
+  },
+  "map": {
+    "layers": {
+      "grayscale": "Gris",
+      "color": "Couleur",
+      "properties": "Propriétés",
+      "buildingLayouts": "Emprises bâties"
+    }
+  },
+  "about": {
+    "backToMap": "Retour à la carte",
+    "title": "À Propos",
+    "description1": "Les données affichées ici proviennent directement du site {link}. Elles restent leur propriété exclusive.",
+    "linkText": "fidp.ch",
+    "description2": "J'ai simplement récupéré ces informations pour concevoir cette carte, afin d'offrir une meilleure vue d'ensemble des propriétés de la fondation dans tout le canton de Genève."
   }
 }

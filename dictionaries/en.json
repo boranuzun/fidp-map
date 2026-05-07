@@ -1,9 +1,13 @@
 {
   "common": {
-    "title": "GENEVA MAP",
-    "about": "About"
+    "title": "FIDP MAP",
+    "about": "About",
+    "language": "Language",
+    "french": "Français",
+    "english": "English"
   },
   "dashboard": {
+    "loadingMap": "Loading Map...",
     "searchPlaceholder": "SEARCH PROPERTIES...",
     "groupByLocalite": "GROUP BY LOCALITÉ",
     "propertiesCount": "{count} PROPERTIES",
@@ -12,8 +16,41 @@
     "fondations": "FONDATIONS",
     "allLocalites": "ALL LOCALITÉS",
     "allFondations": "ALL FONDATIONS",
+    "allProperties": "All Properties",
+    "unknownLocalite": "Unknown",
     "filteredResults": "Filtered Results ({count})",
     "noMatch": "No properties match your filters.",
     "visitSite": "Visit Official Site"
+  },
+  "details": {
+    "noPhoto": "No photo available",
+    "locationDetails": "Location Details",
+    "fullAddress": "Full Address",
+    "localite": "Localité",
+    "notAvailable": "N/A",
+    "units": "Units",
+    "unknown": "Unknown",
+    "mgmtHistory": "Management & History",
+    "fondation": "Fondation",
+    "construction": "Construction",
+    "builtIn": "Built in {year}",
+    "group": "Group",
+    "tags": "Tags",
+    "escToClose": "ESC TO CLOSE"
+  },
+  "map": {
+    "layers": {
+      "grayscale": "Grayscale",
+      "color": "Color",
+      "properties": "Properties",
+      "buildingLayouts": "Building Layouts"
+    }
+  },
+  "about": {
+    "backToMap": "Back to map",
+    "title": "About",
+    "description1": "The data displayed here comes directly from the {link} website. It remains their exclusive property.",
+    "linkText": "fidp.ch",
+    "description2": "I simply collected this information to design this map, in order to provide a better overview of the foundation's properties throughout the canton of Geneva."
   }
 }

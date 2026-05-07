@@ -1,8 +1,16 @@
 import { db } from '@/lib/db';
 import DashboardClient from '@/components/DashboardClient';
 import { type Property } from '@/components/PropertyMap';
+import { getDictionary } from '@/lib/get-dictionary';
+import { Locale } from '@/i18n-config';
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ lang: Locale }>;
+}) {
+  const { lang } = await params;
+  const dict = await getDictionary(lang);
   const rs = await db.execute('SELECT * FROM property');
   // Sanitize rows to plain objects for React Server Components serialization
   const properties = rs.rows.map((row) => {
@@ -32,5 +40,5 @@ export default async function Page() {
     return p;
   }) as unknown as Property[];
 
-  return <DashboardClient initialProperties={properties} />;
+  return <DashboardClient initialProperties={properties} dict={dict} />;
 }
