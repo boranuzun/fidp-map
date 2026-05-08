@@ -56,40 +56,40 @@ export function MultiSelectCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className={cn('cursor-pointer', className)}>
-          <InputGroup className="h-10 border-swiss border-black bg-white rounded-none hover:bg-slate-50 transition-colors">
-            <InputGroupAddon className="pl-3 pr-2 text-black">
+          <InputGroup className="h-10 border-swiss border-border bg-background rounded-none hover:bg-muted transition-colors">
+            <InputGroupAddon className="pl-3 pr-2 text-foreground">
               <Icon className="size-4" />
             </InputGroupAddon>
-            <div className="flex-1 text-sm font-black uppercase overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="flex-1 text-sm font-black uppercase overflow-hidden text-ellipsis whitespace-nowrap text-foreground">
               {displayText}
             </div>
-            <InputGroupAddon align="inline-end" className="pr-3 text-black/40">
+            <InputGroupAddon align="inline-end" className="pr-3 text-foreground/40">
               <ChevronDown className="size-4" />
             </InputGroupAddon>
           </InputGroup>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[240px] p-0 border-2 border-black rounded-none shadow-none overflow-hidden" align="start">
-        <Command className="rounded-none overflow-hidden p-0 bg-white">
-          <div className="flex flex-col border-b-2 border-black">
+      <PopoverContent className="w-[240px] p-0 border-2 border-border rounded-none shadow-none overflow-hidden" align="start">
+        <Command className="rounded-none overflow-hidden p-0 bg-background">
+          <div className="flex flex-col border-b-2 border-border">
             <CommandInput 
               placeholder={`SEARCH ${placeholder}...`} 
-              className="h-12 font-black uppercase border-none rounded-none focus:ring-0 w-full"
+              className="h-12 font-black uppercase border-none rounded-none focus:ring-0 w-full bg-transparent text-foreground placeholder:text-muted-foreground"
               containerClassName="p-0"
-              wrapperClassName="border-none bg-transparent h-12! rounded-none! shadow-none! flex-row-reverse *:data-[slot=input-group-addon]:pr-3! *:data-[slot=input-group-addon]:pl-0!"
+              wrapperClassName="border-none bg-transparent h-12! rounded-none! shadow-none! flex-row-reverse *:text-foreground *:data-[slot=input-group-addon]:pr-3! *:data-[slot=input-group-addon]:pl-0!"
             />
-            <div className="flex border-t-2 border-black">
+            <div className="flex border-t-2 border-border">
               <button
                 type="button"
                 onClick={() => onChange(options)}
-                className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest border-r-2 border-black hover:bg-black hover:text-white transition-none"
+                className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest border-r-2 border-border hover:bg-foreground hover:text-background transition-none text-foreground"
               >
                 [ SELECT ALL ]
               </button>
               <button
                 type="button"
                 onClick={() => onChange([])}
-                className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-none"
+                className="flex-1 py-3 text-[9px] font-black uppercase tracking-widest hover:bg-foreground hover:text-background transition-none text-foreground"
               >
                 [ CLEAR ALL ]
               </button>
@@ -104,12 +104,12 @@ export function MultiSelectCombobox({
                   onSelect={() => toggleOption(option)}
                   className={cn(
                     "flex items-center gap-2 px-4 py-3 cursor-pointer font-black uppercase text-[10px] tracking-wider rounded-none transition-none",
-                    "bg-white text-black hover:bg-slate-100 aria-selected:bg-slate-100 aria-selected:text-black"
+                    "bg-background text-foreground hover:bg-muted aria-selected:bg-muted aria-selected:text-foreground"
                   )}
                 >
                   <div className={cn(
-                    "flex size-4 items-center justify-center border-2 border-black transition-none shrink-0",
-                    selected.includes(option) ? "bg-black text-white" : "bg-white"
+                    "flex size-4 items-center justify-center border-2 border-border transition-none shrink-0",
+                    selected.includes(option) ? "bg-foreground text-background" : "bg-background"
                   )}>
                     {selected.includes(option) && <Check className="size-3" />}
                   </div>

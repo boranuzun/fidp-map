@@ -1,26 +1,69 @@
-import { render, screen, fireEvent } from "@testing-library/react"
-import { describe, it, expect, vi } from "vitest"
-import LanguageSwitcher from "../ui/language-switcher"
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import LanguageSwitcher from '../ui/language-switcher';
+import userEvent from '@testing-library/user-event';
 
 // Mock next/navigation
-const mockPush = vi.fn()
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/fr/about",
-  useRouter: () => ({ push: mockPush }),
-}))
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+  usePathname: () => '/en/about',
+}));
 
-describe("LanguageSwitcher", () => {
-  it("renders with current language", () => {
-    const dict = { common: { french: "Français", english: "English", language: "Language" } }
-    render(<LanguageSwitcher dict={dict} currentLang="fr" />)
-    expect(screen.getByRole("combobox")).toHaveValue("fr")
-  })
+// Mock PointerEvent which is not in JSDOM but used by Radix UI
+if (typeof window !== 'undefined' && !window.PointerEvent) {
+  class PointerEvent extends MouseEvent {
+    constructor(type: string, params: MouseEventInit = {}) {
+      super(type, params);
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  window.PointerEvent = PointerEvent as any;
+}
 
-  it("calls router.push when language changes", () => {
-    const dict = { common: { french: "Français", english: "English", language: "Language" } }
-    render(<LanguageSwitcher dict={dict} currentLang="fr" />)
+describe('LanguageSwitcher', () => {
+  const mockDict = {
+    common: {
+      french: 'Français',
+      english: 'English',
+      german: 'Deutsch',
+      italian: 'Italiano',
+      language: 'Language',
+    }
+  };
+
+  it('renders correctly with current language', () => {
+    render(<LanguageSwitcher dict={mockDict} currentLang="en" />);
+    expect(screen.getByText('EN')).toBeInTheDocument();
+  });
+
+  it('opens menu and changes language when an option is clicked', async () => {
+    const user = userEvent.setup();
+    render(<LanguageSwitcher dict={mockDict} currentLang="en" />);
     
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "en" } })
-    expect(mockPush).toHaveBeenCalledWith("/en/about")
-  })
-})
+    const trigger = screen.getByRole('button');
+    await user.click(trigger);
+    
+    // Radix dropdown content is rendered in a portal
+    const frOption = await screen.findByText('Français');
+    await user.click(frOption);
+    
+    expect(mockPush).toHaveBeenCalledWith('/fr/about');
+  });
+
+  it('allows switching to German', async () => {
+    const user = userEvent.setup();
+    render(<LanguageSwitcher dict={mockDict} currentLang="en" />);
+    
+    const trigger = screen.getByRole('button');
+    await user.click(trigger);
+    
+    const deOption = await screen.findByText('Deutsch');
+    await user.click(deOption);
+    
+    expect(mockPush).toHaveBeenCalledWith('/de/about');
+  });
+});

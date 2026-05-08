@@ -5,16 +5,8 @@ import dynamic from "next/dynamic"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { Input } from "./ui/input"
-import { Button } from "./ui/button"
 import LanguageSwitcher from "./ui/language-switcher"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "./ui/sheet"
+import { ModeToggle } from "./ui/mode-toggle"
 import {
   Carousel,
   CarouselContent,
@@ -26,16 +18,14 @@ import { Dialog, DialogContent, DialogTitle } from "./ui/dialog"
 import { MultiSelectCombobox } from "./ui/multi-select-combobox"
 import { Switch } from "./ui/switch"
 import { Label } from "./ui/label"
+import MapSidebar from "./map/MapSidebar"
+import PropertyDetailsSidebar from "./map/PropertyDetailsSidebar"
 import { type Property } from "./PropertyMap"
 import {
   Building2,
   MapPin,
-  Users,
   Globe,
-  Landmark,
   Layers,
-  Calendar,
-  Hash,
 } from "lucide-react"
 import logo from "../public/fidp-logo.webp"
 
@@ -45,7 +35,7 @@ const MapPlaceholder = () => {
   const loadingText = lang === "fr" ? "Chargement de la carte..." : "Loading Map..."
 
   return (
-    <div className="flex h-full w-full animate-pulse items-center justify-center bg-slate-100 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+    <div className="flex h-full w-full animate-pulse items-center justify-center bg-muted text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
       {loadingText}
     </div>
   )
@@ -70,6 +60,11 @@ interface DashboardClientProps {
     common: {
       title: string
       about: string
+      language: string
+      french: string
+      english: string
+      german: string
+      italian: string
     }
     dashboard: {
       allProperties: string
@@ -88,10 +83,12 @@ interface DashboardClientProps {
     }
     details: Record<string, string>
     map: {
-      grayscale: string
-      color: string
-      properties: string
-      buildingLayouts: string
+      layers: {
+        grayscale: string
+        color: string
+        properties: string
+        buildingLayouts: string
+      }
     }
   }
 }
@@ -143,7 +140,8 @@ export default function DashboardClient({
   const isFiltered = 
     search !== "" || 
     selectedLocalites.length !== allLocalites.length || 
-    selectedFondations.length !== allFondations.length;
+    selectedFondations.length !== allFondations.length ||
+    groupByLocalite;
 
   const properties = initialProperties
 
@@ -202,7 +200,11 @@ export default function DashboardClient({
       }}
       onClick={() => setSelectedProperty(p)}
       onMouseEnter={() => prefetchImages(p.images)}
-      className={`group cursor-pointer border-b border-black/10 p-6 transition-colors ${selectedProperty?.id === p.id ? "bg-black text-white" : "hover:bg-black hover:text-white"}`}
+      className={`group cursor-pointer border-b border-border p-6 transition-all duration-200 ease-out ${
+        selectedProperty?.id === p.id 
+          ? "bg-primary text-primary-foreground shadow-xl z-10 relative" 
+          : "hover:bg-card-hover active:bg-muted"
+      }`}
     >
       <h3 className="text-sm leading-none font-black uppercase">
         {p.name || p.address}
@@ -213,7 +215,7 @@ export default function DashboardClient({
       </div>
       {p.localite && !groupByLocalite && (
         <div className="mt-3 flex gap-2">
-          <div className="border-2 border-current px-1.5 py-0.5 text-[9px] font-bold uppercase">
+          <div className="rounded border border-current px-1.5 py-0.5 text-[9px] font-bold uppercase opacity-60">
             {p.localite}
           </div>
         </div>
@@ -222,113 +224,118 @@ export default function DashboardClient({
   )
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <header className="border-b-swiss z-20 flex h-16 shrink-0 items-center justify-between border-black bg-white px-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden relative">
-            <Image
-              src={logo}
-              alt="FIDP Logo"
-              fill
-              className="object-contain p-1"
-              unoptimized
-            />
-          </div>
-          <div className="text-2xl font-black tracking-tighter text-black uppercase">
-            {dict.common.title}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <div className="flex items-center space-x-3">
-            <Switch
-              id="group-by-localite"
-              checked={groupByLocalite}
-              onCheckedChange={setGroupByLocalite}
-            />
-            <Label
-              htmlFor="group-by-localite"
-              className="cursor-pointer text-[10px] font-bold tracking-widest text-black uppercase"
-            >
-              {dict.dashboard.groupByLocalite}
-            </Label>
-          </div>
-
-          <LanguageSwitcher dict={dict} currentLang={lang} />
-
-          <Link
-            href={`/${lang}/about`}
-            className="flex size-8 items-center justify-center border-2 border-black font-black transition-colors hover:bg-black hover:text-white"
-            title={dict.common.about}
-          >
-            ?
-          </Link>
-        </div>
-      </header>
-
-      <div className="border-b-swiss z-10 flex h-14 shrink-0 items-center gap-4 border-black bg-white px-6">
-        <div className="relative max-w-md flex-1">
-          <Input
-            placeholder={dict.dashboard.searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border-swiss h-10 border-black bg-white px-4 font-black placeholder:text-black/30 focus:ring-0"
-          />
-        </div>
-        <MultiSelectCombobox
-          options={allLocalites}
-          selected={selectedLocalites}
-          onChange={setSelectedLocalites}
-          placeholder={dict.dashboard.localites}
-          allLabel={dict.dashboard.allLocalites}
-          icon={MapPin}
-          className="min-w-[200px]"
+    <div className="relative h-screen w-screen overflow-hidden bg-background">
+      {/* 1. Map Foundation */}
+      <main className="absolute inset-0 z-0" role="main">
+        <PropertyMap
+          properties={filtered}
+          onSelect={setSelectedProperty}
+          selectedProperty={selectedProperty}
+          onHover={(p) => prefetchImages(p.images)}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          dict={{ ...dict.map, dashboard: dict.dashboard } as any}
         />
-        <MultiSelectCombobox
-          options={allFondations}
-          selected={selectedFondations}
-          onChange={setSelectedFondations}
-          placeholder={dict.dashboard.fondations}
-          allLabel={dict.dashboard.allFondations}
-          icon={Building2}
-          className="min-w-[200px]"
-        />
-        <Button
-          onClick={resetFilters}
-          disabled={!isFiltered}
-          className="h-10 bg-black px-6 font-black tracking-widest text-white uppercase transition-none hover:bg-black/90 disabled:bg-black/20 disabled:cursor-not-allowed"
-        >
-          {dict.dashboard.resetFilters}
-        </Button>
-      </div>
+      </main>
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="border-r-swiss z-30 w-80 overflow-y-auto border-black bg-white">
-          <div className="border-b-swiss flex h-12 items-center border-black bg-slate-50 px-6">
+      {/* 2. Floating Sidebar */}
+      <MapSidebar
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dictionary={dict as any}
+        search={search}
+        onSearch={setSearch}
+        onReset={resetFilters}
+        isFiltered={isFiltered}
+        header={
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-black animate-pulse" />
-              <h2 className="text-[10px] font-black tracking-[0.3em] uppercase">
-                {filtered.length} {dict.dashboard.propertiesCount.split('{count}')[1].trim() || 'RESULTS'}
-              </h2>
+              <div className="flex h-8 w-8 items-center justify-center overflow-hidden relative">
+                <Image
+                  src={logo}
+                  alt="FIDP Logo"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+              <div className="text-lg font-black tracking-tighter text-foreground uppercase">
+                {dict.common.title}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher dict={dict} currentLang={lang} />
+              <ModeToggle />
+              <Link
+                href={`/${lang}/about`}
+                className="flex size-9 items-center justify-center bg-glass backdrop-blur-md border border-glass-border rounded-xl shadow-lg text-lg font-medium transition-all hover:bg-muted cursor-pointer"
+                title={dict.common.about}
+              >
+                ?
+              </Link>
             </div>
           </div>
+        }
+        filters={
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between px-1">
+              <Label
+                htmlFor="group-by-localite-sidebar"
+                className="cursor-pointer text-[10px] font-bold tracking-widest text-muted-foreground uppercase"
+              >
+                {dict.dashboard.groupByLocalite}
+              </Label>
+              <Switch
+                id="group-by-localite-sidebar"
+                checked={groupByLocalite}
+                onCheckedChange={setGroupByLocalite}
+              />
+            </div>
+            <div className="grid gap-2">
+              <MultiSelectCombobox
+                options={allLocalites}
+                selected={selectedLocalites}
+                onChange={setSelectedLocalites}
+                placeholder={dict.dashboard.localites}
+                allLabel={dict.dashboard.allLocalites}
+                icon={MapPin}
+                className="w-full bg-background"
+              />
+              <MultiSelectCombobox
+                options={allFondations}
+                selected={selectedFondations}
+                onChange={setSelectedFondations}
+                placeholder={dict.dashboard.fondations}
+                allLabel={dict.dashboard.allFondations}
+                icon={Building2}
+                className="w-full bg-background"
+              />
+            </div>
+          </div>
+        }
+      >
+        <div className="divide-y divide-border">
+          <div className="px-6 py-3 bg-header flex items-center justify-between">
+            <h2 className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
+              {filtered.length} {dict.dashboard.propertiesCount.split('{count}')[1].trim() || 'RESULTS'}
+            </h2>
+          </div>
+          
           {filtered.length > 0 ? (
-            <div className="divide-y divide-black/10">
+            <div className="divide-y divide-border">
               {Object.entries(groupedProperties).map(
                 ([groupName, groupItems]) => (
                   <div key={groupName}>
                     {groupByLocalite && (
-                      <div className="border-b-swiss sticky top-0 z-10 flex items-center gap-2 border-black bg-slate-50 px-5 py-2">
-                        <Layers className="h-3 w-3 opacity-30" />
-                        <span className="text-[10px] font-black tracking-widest uppercase">
+                      <div className="sticky top-0 z-10 flex items-center gap-2 bg-header/90 backdrop-blur-sm px-5 py-2 border-y border-border">
+                        <Layers className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
                           {groupName}
                         </span>
-                        <div className="ml-auto border-2 border-black/20 px-1 text-[10px] font-black">
+                        <div className="ml-auto text-[10px] font-black text-muted-foreground">
                           {groupItems.length}
                         </div>
                       </div>
                     )}
-                    <div className="divide-y divide-black/10">
+                    <div className="divide-y divide-border">
                       {groupItems.map(renderPropertyCard)}
                     </div>
                   </div>
@@ -337,214 +344,28 @@ export default function DashboardClient({
             </div>
           ) : (
             <div className="p-12 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                <Globe className="h-6 w-6 text-slate-300" />
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <Globe className="h-6 w-6 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-medium text-balance text-slate-500">
+              <p className="text-sm font-medium text-balance text-muted-foreground">
                 {dict.dashboard.noMatch}
               </p>
             </div>
           )}
-        </aside>
+        </div>
+      </MapSidebar>
 
-        <main className="relative flex-1">
-          <PropertyMap
-            properties={filtered}
-            onSelect={setSelectedProperty}
-            selectedProperty={selectedProperty}
-            onHover={(p) => prefetchImages(p.images)}
-            dict={dict.map}
-          />
+      <PropertyDetailsSidebar
+        property={selectedProperty}
+        dict={dict}
+        onClose={() => setSelectedProperty(null)}
+        onOpenFullScreen={(index) => {
+          setFullScreenIndex(index)
+          setIsFullScreen(true)
+        }}
+      />
 
-          <Sheet
-            modal={false}
-            open={!!selectedProperty}
-            onOpenChange={(open) => {
-              if (!open && !isFullScreen) {
-                setSelectedProperty(null)
-              }
-            }}
-          >
-            <SheetContent
-              side="right"
-              portal={false}
-              className="absolute inset-y-0 right-0 z-30 h-full gap-0 border-l-[3px] border-black p-0 shadow-none sm:max-w-md"
-            >
-              <SheetDescription className="sr-only">
-                Details and information about the selected property.
-              </SheetDescription>
-              <div className="flex h-full flex-col bg-white">
-                <div className="group/carousel relative h-72 shrink-0 overflow-hidden bg-black">
-                  {selectedProperty?.images &&
-                  selectedProperty.images.length > 0 ? (
-                    <Carousel className="h-full w-full" opts={{ loop: true }}>
-                      <CarouselContent className="ml-0 h-72">
-                        {selectedProperty.images.map((img, index) => (
-                          <CarouselItem
-                            key={img}
-                            className="relative h-full cursor-zoom-in pl-0"
-                            onClick={() => {
-                              setFullScreenIndex(index)
-                              setIsFullScreen(true)
-                            }}
-                          >
-                            <Image
-                              src={img}
-                              alt={`${selectedProperty.name || selectedProperty.address} - Photo ${index + 1}`}
-                              fill
-                              unoptimized
-                              className="h-full w-full object-cover opacity-90 transition-opacity hover:opacity-100"
-                            />
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      {selectedProperty.images.length > 1 && (
-                        <>
-                          <CarouselPrevious className="left-2 opacity-0 transition-opacity group-hover/carousel:opacity-100" />
-                          <CarouselNext className="right-2 opacity-0 transition-opacity group-hover/carousel:opacity-100" />
-                        </>
-                      )}
-                    </Carousel>
-                  ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center bg-black text-white">
-                      <Building2 className="mb-2 h-12 w-12 opacity-20" />
-                      <span className="text-[10px] font-black tracking-widest uppercase opacity-40">
-                        {dict.details.noPhoto}
-                      </span>
-                    </div>
-                  )}
-                  <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
-                  <div className="pointer-events-none absolute right-8 bottom-8 left-8 text-white">
-                    <SheetHeader className="space-y-0 p-0">
-                      <SheetTitle className="text-4xl leading-none font-black tracking-tighter text-white uppercase">
-                        {selectedProperty?.name || selectedProperty?.address}
-                      </SheetTitle>
-                    </SheetHeader>
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-10">
-                  <div className="space-y-12">
-                    <section>
-                      <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
-                        <MapPin className="h-3.5 w-3.5" />{" "}
-                        {dict.details.locationDetails}
-                      </h4>
-                      <div className="space-y-6">
-                        <div>
-                          <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
-                            {dict.details.fullAddress}
-                          </p>
-                          <p className="text-base leading-tight font-black">
-                            {selectedProperty?.address}
-                            {selectedProperty?.zip && (
-                              <span className="ml-2 font-medium tracking-tight opacity-40">
-                                ({selectedProperty.zip})
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-6 border-t border-black/10 pt-6">
-                          <div>
-                            <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
-                              {dict.details.localite}
-                            </p>
-                            <p className="text-sm font-black uppercase">
-                              {selectedProperty?.localite ||
-                                dict.details.notAvailable}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="mb-1 text-[9px] font-bold uppercase opacity-40">
-                              {dict.details.units}
-                            </p>
-                            <div className="flex items-center gap-1.5 text-sm font-black uppercase">
-                              <Users className="h-4 w-4" />
-                              {selectedProperty?.units || dict.details.unknown}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </section>
-
-                    <section>
-                      <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
-                        <Landmark className="h-3.5 w-3.5" />{" "}
-                        {dict.details.mgmtHistory}
-                      </h4>
-                      <div className="grid gap-4">
-                        <div className="border-swiss flex items-center justify-between border-black p-5">
-                          <span className="text-[10px] font-bold uppercase opacity-40">
-                            {dict.details.fondation}
-                          </span>
-                          <span className="text-sm font-black uppercase">
-                            {selectedProperty?.fondation ||
-                              dict.details.notAvailable}
-                          </span>
-                        </div>
-                        {selectedProperty?.construction_year && (
-                          <div className="border-swiss flex items-center justify-between border-black p-5">
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase opacity-40">
-                              <Calendar className="h-3 w-3" />{" "}
-                              {dict.details.construction}
-                            </span>
-                            <span className="text-sm font-black uppercase">
-                              {dict.details.builtIn.replace(
-                                "{year}",
-                                selectedProperty.construction_year.toString()
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        <div className="border-swiss flex items-center justify-between border-black p-5">
-                          <span className="text-[10px] font-bold uppercase opacity-40">
-                            {dict.details.group}
-                          </span>
-                          <span className="text-sm font-black uppercase">
-                            {selectedProperty?.group ||
-                              dict.details.notAvailable}
-                          </span>
-                        </div>
-                      </div>
-                    </section>
-
-                    {selectedProperty?.tags &&
-                      selectedProperty.tags.length > 0 && (
-                        <section>
-                          <h4 className="border-b-swiss mb-6 flex items-center gap-2 border-black pb-2 text-[10px] font-black tracking-[0.2em] text-black uppercase">
-                            <Hash className="h-3.5 w-3.5" /> {dict.details.tags}
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedProperty.tags.map((tag) => (
-                              <div
-                                key={tag}
-                                className="bg-black px-2 py-1 text-[9px] font-black tracking-wider text-white uppercase"
-                              >
-                                {tag}
-                              </div>
-                            ))}
-                          </div>
-                        </section>
-                      )}
-                  </div>
-                </div>
-
-                <div className="border-t-swiss border-black bg-white p-8">
-                  <a
-                    href={selectedProperty?.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center bg-black py-5 text-xs font-black tracking-[0.2em] text-white uppercase transition-colors hover:bg-slate-900"
-                  >
-                    {dict.dashboard.visitSite}
-                  </a>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </main>
-      </div>
-
+      {/* 3. Full-screen Carousel Dialog */}
       <Dialog open={isFullScreen} onOpenChange={setIsFullScreen}>
         <DialogContent
           showCloseButton={true}
@@ -555,7 +376,7 @@ export default function DashboardClient({
             selectedProperty.images && selectedProperty.images.length > 0 ? (
               <div className="relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-transparent">
                 {/* Header Info */}
-                <div className="pointer-events-none absolute top-6 left-1/2 z-2010 -translate-x-1/2 border-2 border-white bg-black/80 px-6 py-2 text-sm font-black tracking-[0.2em] text-white uppercase">
+                <div className="pointer-events-none absolute top-6 left-1/2 z-2010 -translate-x-1/2 border border-white/20 backdrop-blur-md bg-black/80 px-6 py-2 rounded-xl text-sm font-black tracking-[0.2em] text-white uppercase shadow-2xl">
                   {selectedProperty.name || selectedProperty.address}
                 </div>
 
@@ -579,7 +400,7 @@ export default function DashboardClient({
                             alt={`${selectedProperty.name || selectedProperty.address} - Full Photo ${index + 1}`}
                             fill
                             unoptimized
-                            className="border-2 border-white/10 object-contain shadow-[0_0_50px_rgba(255,255,255,0.1)]"
+                            className="object-contain"
                           />
                         </div>
                       </CarouselItem>
@@ -589,8 +410,8 @@ export default function DashboardClient({
                   {/* Explicit Navigation Controls */}
                   {selectedProperty.images.length > 1 && (
                     <>
-                      <CarouselPrevious className="left-8 z-2015 size-20 border-4 border-white bg-black/50 text-white transition-all hover:bg-white hover:text-black" />
-                      <CarouselNext className="right-8 z-2015 size-20 border-4 border-white bg-black/50 text-white transition-all hover:bg-white hover:text-black" />
+                      <CarouselPrevious className="left-8 z-2015 size-20 border-white/20 bg-black/50 text-white transition-all hover:bg-white hover:text-black rounded-2xl" />
+                      <CarouselNext className="right-8 z-2015 size-20 border-white/20 bg-black/50 text-white transition-all hover:bg-white hover:text-black rounded-2xl" />
                     </>
                   )}
                 </Carousel>

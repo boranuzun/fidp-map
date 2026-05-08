@@ -1,0 +1,63 @@
+{
+  "common": {
+    "title": "FIDP MAPPA",
+    "about": "Informazioni",
+    "language": "Lingua",
+    "french": "Francese",
+    "english": "Inglese",
+    "german": "Tedesco",
+    "italian": "Italiano"
+  },
+  "dashboard": {
+    "loadingMap": "Caricamento della mappa...",
+    "searchPlaceholder": "CERCA PROPRIETÀ...",
+    "groupByLocalite": "RAGGRUPPA PER LOCALITÀ",
+    "propertiesCount": "{count} PROPRIETÀ",
+    "resetFilters": "REIMPOSTA FILTRI",
+    "localites": "LOCALITÀ",
+    "fondations": "FONDAZIONI",
+    "allLocalites": "TUTTE LE LOCALITÀ",
+    "allFondations": "TUTTE LE FONDAZIONI",
+    "allProperties": "Tutte le proprietà",
+    "unknownLocalite": "Sconosciuto",
+    "filteredResults": "Risultati filtrati ({count})",
+    "noMatch": "Nessuna proprietà corrisponde ai tuoi filtri.",
+    "visitSite": "Visita il sito ufficiale"
+  },
+  "details": {
+    "noPhoto": "Nessuna foto disponibile",
+    "locationDetails": "Dettagli posizione",
+    "fullAddress": "Indirizzo completo",
+    "localite": "Località",
+    "notAvailable": "N/D",
+    "units": "Unità",
+    "unknown": "Sconosciuto",
+    "mgmtHistory": "Gestione e Storia",
+    "fondation": "Fondazione",
+    "construction": "Costruzione",
+    "builtIn": "Costruito nel {year}",
+    "group": "Gruppo",
+    "tags": "Tag",
+    "escToClose": "ESC PER CHIUDERE"
+  },
+  "map": {
+    "layers": {
+      "style": "Stile della mappa",
+      "grayscale": "Scala di grigi",
+      "color": "Colore",
+      "properties": "Proprietà",
+      "buildingLayouts": "Planimetrie edifici"
+    }
+  },
+  "about": {
+    "backToMap": "Torna alla mappa",
+    "title": "Informazioni su FIDP Mappa",
+    "description1": "I dati visualizzati qui provengono direttamente dal sito web {link}. Rimangono di loro proprietà esclusiva.",
+    "linkText": "fidp.ch",
+    "description2": "Ho raccolto queste informazioni tramite lo scraping del loro sito web e conducendo le mie ricerche personali. Questi dati sono stati poi compilati per progettare questa mappa, fornendo una migliore panoramica delle proprietà della fondazione in tutto il cantone di Ginevra.",
+    "howItWorks": "Come funziona",
+    "howItWorksDesc": "Questa applicazione visualizza gli asset immobiliari geograficamente utilizzando moderne tecnologie web. È possibile cercare, filtrare per fondazione o posizione e visualizzare informazioni dettagliate per ogni edificio.",
+    "opensource": "Open Source",
+    "opensourceDesc": "Questo progetto è open-source e dedicato alla comunità. La trasparenza e l'accessibilità sono al centro del suo design."
+  }
+}

@@ -19,16 +19,25 @@ export interface Property {
 
 export interface MapDictionary {
   layers: {
+    style: string;
     grayscale: string;
     color: string;
     properties: string;
     buildingLayouts: string;
   };
+  dashboard?: {
+    searchPlaceholder: string;
+    resetFilters: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 export interface MapProps {
   properties: Property[];
-  onSelect: (p: Property) => void;
+  onSelect: (p: Property | null) => void;
   selectedProperty: Property | null;
   onHover?: (p: Property) => void;
   dict: MapDictionary;

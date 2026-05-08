@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { Building2, ArrowLeft } from 'lucide-react';
 import { getDictionary } from '@/lib/get-dictionary';
 import { Locale } from '@/i18n-config';
-import LanguageSwitcher from '@/components/ui/language-switcher';
 
 export default async function AboutPage({
   params,
@@ -15,49 +13,71 @@ export default async function AboutPage({
   const description1Parts = dict.about.description1.split('{link}');
 
   return (
-    <div className="min-h-screen bg-white text-black font-inter">
-      <header className="h-16 border-b-swiss border-black flex items-center justify-between px-6 bg-white shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-white" />
-          </div>
-          <div className="font-black text-2xl tracking-tighter uppercase">
-            {dict.common.title}
-          </div>
+    <div 
+      data-testid="about-page-wrapper"
+      className="h-screen w-screen bg-background text-foreground font-inter p-6 md:p-12 overflow-hidden flex flex-col selection:bg-blue-100 dark:selection:bg-blue-900"
+    >
+      <main className="max-w-3xl mx-auto flex-1 flex flex-col justify-between">
+        {/* Navigation */}
+        <div className="pt-2">
+          <Link 
+            href={`/${lang}`} 
+            className="group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-blue-600 transition-colors"
+          >
+            <span className="text-base">←</span> {dict.about.backToMap}
+          </Link>
         </div>
-        <LanguageSwitcher dict={dict} currentLang={lang} />
-      </header>
 
-      <main className="max-w-3xl mx-auto py-20 px-6">
-        <Link
-          href={`/${lang}`}
-          className="inline-flex items-center gap-2 px-4 py-2 border-2 border-black font-black uppercase text-[10px] tracking-[0.2em] mb-12 hover:bg-black hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          {dict.about.backToMap}
-        </Link>
+        {/* Hero Section */}
+        <section className="space-y-6 md:space-y-8">
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85]">
+            {dict.about.title}
+          </h1>
+          
+          <div className="space-y-4 md:space-y-6 text-lg md:text-xl font-medium leading-tight tracking-tight max-w-2xl text-balance">
+            <p>
+              {description1Parts[0]}
+              <a
+                href="https://fidp.ch"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline underline-offset-4 decoration-2 hover:text-blue-800 transition-colors"
+              >
+                {dict.about.linkText}
+              </a>
+              {description1Parts[1]}
+            </p>
+            <p>
+              {dict.about.description2}
+            </p>
+          </div>
+        </section>
 
-        <h1 className="text-6xl font-black uppercase tracking-tighter leading-none mb-12">
-          {dict.about.title}
-        </h1>
+        {/* Info Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 py-8 border-t border-border">
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+              {dict.about.howItWorks}
+            </h2>
+            <p className="text-sm font-medium leading-snug text-muted-foreground">
+              {dict.about.howItWorksDesc}
+            </p>
+          </section>
 
-        <div className="space-y-8 border-l-4 border-black pl-8 py-2">
-          <p className="text-xl font-bold leading-relaxed">
-            {description1Parts[0]}
-            <a
-              href="https://fidp.ch"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline decoration-2 underline-offset-4"
-            >
-              {dict.about.linkText}
-            </a>
-            {description1Parts[1]}
-          </p>
-          <p className="text-xl font-bold leading-relaxed">
-            {dict.about.description2}
-          </p>
+          <section className="space-y-3">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+              {dict.about.opensource}
+            </h2>
+            <p className="text-sm font-medium leading-snug text-muted-foreground">
+              {dict.about.opensourceDesc}
+            </p>
+          </section>
         </div>
+
+        {/* Footer */}
+        <footer className="pb-4 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
+          © {new Date().getFullYear()} {dict.common.title}
+        </footer>
       </main>
     </div>
   );

@@ -4,7 +4,9 @@
     "about": "About",
     "language": "Language",
     "french": "Français",
-    "english": "English"
+    "english": "English",
+    "german": "German",
+    "italian": "Italian"
   },
   "dashboard": {
     "loadingMap": "Loading Map...",
@@ -40,6 +42,7 @@
   },
   "map": {
     "layers": {
+      "style": "Map Style",
       "grayscale": "Grayscale",
       "color": "Color",
       "properties": "Properties",
@@ -48,9 +51,13 @@
   },
   "about": {
     "backToMap": "Back to map",
-    "title": "About",
+    "title": "About FIDP Map",
     "description1": "The data displayed here comes directly from the {link} website. It remains their exclusive property.",
     "linkText": "fidp.ch",
-    "description2": "I simply collected this information to design this map, in order to provide a better overview of the foundation's properties throughout the canton of Geneva."
+    "description2": "I collected this information through scraping their website and conducting my own research. This data was then compiled to design this map, providing a better overview of the foundation's properties throughout the canton of Geneva.",
+    "howItWorks": "How it works",
+    "howItWorksDesc": "This application visualizes real estate assets geographically using modern web technologies. You can search, filter by foundation or location, and view detailed information for each building.",
+    "opensource": "Open Source",
+    "opensourceDesc": "This project is open-source and dedicated to the community. Transparency and accessibility are at the heart of its design."
   }
 }

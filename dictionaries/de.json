@@ -1,0 +1,63 @@
+{
+  "common": {
+    "title": "FIDP KARTE",
+    "about": "Über uns",
+    "language": "Sprache",
+    "french": "Französisch",
+    "english": "Englisch",
+    "german": "Deutsch",
+    "italian": "Italienisch"
+  },
+  "dashboard": {
+    "loadingMap": "Karte wird geladen...",
+    "searchPlaceholder": "IMMOBILIEN SUCHEN...",
+    "groupByLocalite": "NACH ORTSCHAFT GRUPPIEREN",
+    "propertiesCount": "{count} IMMOBILIEN",
+    "resetFilters": "FILTER ZURÜCKSETZEN",
+    "localites": "ORTSCHAFTEN",
+    "fondations": "STIFTUNGEN",
+    "allLocalites": "ALLE ORTSCHAFTEN",
+    "allFondations": "ALLE STIFTUNGEN",
+    "allProperties": "Alle Immobilien",
+    "unknownLocalite": "Unbekannt",
+    "filteredResults": "Gefilterte Ergebnisse ({count})",
+    "noMatch": "Keine Immobilien entsprechen Ihren Filtern.",
+    "visitSite": "Offizielle Website besuchen"
+  },
+  "details": {
+    "noPhoto": "Kein Foto verfügbar",
+    "locationDetails": "Standortdetails",
+    "fullAddress": "Vollständige Adresse",
+    "localite": "Ortschaft",
+    "notAvailable": "n. v.",
+    "units": "Einheiten",
+    "unknown": "Unbekannt",
+    "mgmtHistory": "Verwaltung & Geschichte",
+    "fondation": "Stiftung",
+    "construction": "Baujahr",
+    "builtIn": "Erbaut im Jahr {year}",
+    "group": "Gruppe",
+    "tags": "Tags",
+    "escToClose": "ESC ZUM SCHLIESSEN"
+  },
+  "map": {
+    "layers": {
+      "style": "Kartenstil",
+      "grayscale": "Graustufen",
+      "color": "Farbe",
+      "properties": "Immobilien",
+      "buildingLayouts": "Gebäudeumrisse"
+    }
+  },
+  "about": {
+    "backToMap": "Zurück zur Karte",
+    "title": "Über FIDP Karte",
+    "description1": "Die hier angezeigten Daten stammen direkt von der Website {link}. Sie bleiben deren exklusives Eigentum.",
+    "linkText": "fidp.ch",
+    "description2": "Ich habe diese Informationen durch das Scraping ihrer Website und eigene Recherchen gesammelt. Diese Daten wurden dann zusammengestellt, um diese Karte zu entwerfen, die einen besseren Überblick über die Liegenschaften der Stiftung im ganzen Kanton Genf bietet.",
+    "howItWorks": "Wie es funktioniert",
+    "howItWorksDesc": "Diese Anwendung visualisiert Immobilienvermögen geografisch unter Verwendung moderner Webtechnologien. Sie können suchen, nach Stiftung oder Standort filtern und detaillierte Informationen zu jedem Gebäude anzeigen.",
+    "opensource": "Open Source",
+    "opensourceDesc": "Dieses Projekt ist Open Source und der Gemeinschaft gewidmet. Transparenz und Zugänglichkeit stehen im Mittelpunkt seines Designs."
+  }
+}

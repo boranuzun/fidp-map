@@ -191,7 +191,7 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute touch-manipulation rounded-none border-2 border-black bg-white hover:bg-black hover:text-white transition-none z-10",
+        "absolute touch-manipulation rounded-none border-2 border-foreground bg-background hover:bg-foreground hover:text-background transition-none z-10",
         orientation === "horizontal"
           ? "top-1/2 left-4 -translate-y-1/2"
           : "top-4 left-1/2 -translate-x-1/2 rotate-90",

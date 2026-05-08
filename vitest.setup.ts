@@ -7,7 +7,30 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() { return [] }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any as { new(callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver; prototype: IntersectionObserver; };
+
 window.HTMLElement.prototype.scrollIntoView = function() {};
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({

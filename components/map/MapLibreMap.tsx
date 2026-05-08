@@ -1,27 +1,42 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import Map, { Marker, Source, Layer, MapRef } from 'react-map-gl/maplibre';
+import Map, { Marker, Source, Layer, MapRef, MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { Layers, MapPin, LayoutDashboard } from 'lucide-react';
+import { Button } from '../ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
 import { useLocalStorage } from '../../hooks/use-local-storage';
-import { MapProps } from './types';
-import { MAP_THEME } from '../../lib/map-config';
-import { MapTheme } from '../../lib/map-config';
+import { MapProps, Property } from './types';
 
-// Mute MapLibre's persistent "Image could not be loaded" warnings which are caused by 
-// inconsistencies in the remote OpenFreeMap styles.
+export type MapTheme = "liberty" | "bright" | "positron"
+export const MAP_THEME: MapTheme = "liberty"
+
+// Mute MapLibre's persistent "Image could not be loaded" warnings
 if (typeof window !== 'undefined') {
   const originalWarn = console.warn;
   const originalError = console.error;
-  const filter = (args: any[]) => 
+  const filter = (args: unknown[]) => 
     args[0] && typeof args[0] === 'string' && 
     args[0].includes('Image') && args[0].includes('could not be loaded');
 
-  console.warn = (...args) => {
+  console.warn = (...args: unknown[]) => {
     if (filter(args)) return;
     originalWarn(...args);
   };
-  console.error = (...args) => {
+  console.error = (...args: unknown[]) => {
     if (filter(args)) return;
     originalError(...args);
   };
@@ -64,12 +79,12 @@ export default function MapLibreMap({
   // Center on selected property
   useEffect(() => {
     if (selectedProperty?.lat && selectedProperty?.lng && mapRef.current) {
-      // The side drawer (Sheet) is roughly 448px wide on desktop (max-w-md).
+      // The new sidebars are on the left (400px) and right (450px).
       // We use padding to tell MapLibre to center the point in the remaining visible area.
       mapRef.current.flyTo({
         center: [selectedProperty.lng, selectedProperty.lat],
         zoom: 18,
-        padding: { right: 448, top: 0, bottom: 0, left: 0 },
+        padding: { left: 400, right: 450, top: 0, bottom: 0 },
         essential: true,
         duration: 1000
       });
@@ -97,22 +112,31 @@ export default function MapLibreMap({
   }), [properties]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden">
       <div className="h-full w-full">
         <Map
           ref={mapRef}
           initialViewState={initialViewState}
           style={{ width: '100%', height: '100%' }}
           mapStyle={`https://tiles.openfreemap.org/styles/${settings.mapTheme || MAP_THEME}`}
-          onStyleImageMissing={(e) => {
-            const id = e.id;
-            if (!e.target.hasImage(id)) {
-              e.target.addImage(id, {
-                width: 1,
-                height: 1,
-                data: new Uint8Array([0, 0, 0, 0])
-              });
+          onClick={(e: MapLayerMouseEvent) => {
+            // Only clear selection if we click on the map itself, not a marker
+            if (e.target.getCanvas().contains(e.originalEvent.target as Node)) {
+              onSelect(null as unknown as Property);
             }
+          }}
+          onLoad={(e) => {
+            e.target.on('styleimagemissing', (ev: { id: string }) => {
+              const id = ev.id;
+              if (!e.target.hasImage(id)) {
+                e.target.addImage(id, {
+                  width: 1,
+                  height: 1,
+                  data: new Uint8Array([0, 0, 0, 0])
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                } as any);
+              }
+            });
           }}
         >
           {/* Inject Building Numbers Layer */}
@@ -208,42 +232,84 @@ export default function MapLibreMap({
         </Map>
       </div>
       
-      {/* Simple toggle UI for settings (since MapLibre doesn't have a built-in LayersControl like Leaflet) */}
-      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 border border-black shadow-sm flex flex-col gap-3 z-10 text-xs font-mono">
-        <div className="flex flex-col gap-1 border-b border-black/10 pb-2">
-          <span className="text-[9px] font-bold opacity-40 uppercase tracking-tighter">Theme</span>
-          <select 
-            value={settings.mapTheme || MAP_THEME}
-            onChange={(e) => {
-              const theme = e.target.value as MapTheme;
-              setSettings(prev => ({ ...prev, mapTheme: theme }));
-            }}
-            className="bg-transparent border border-black/20 p-1 focus:outline-none"
-          >
-            <option value="liberty">Liberty</option>
-            <option value="bright">Bright</option>
-            <option value="positron">Positron</option>
-          </select>
-        </div>
-        
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={settings.showProperties} 
-              onChange={(e) => setSettings(prev => ({ ...prev, showProperties: e.target.checked }))}
-            />
-            {dict.layers.properties}
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={settings.showBuildingLayouts} 
-              onChange={(e) => setSettings(prev => ({ ...prev, showBuildingLayouts: e.target.checked }))}
-            />
-            {dict.layers.buildingLayouts}
-          </label>
-        </div>
+      {/* Floating Glassy Map Controls */}
+      <div 
+        className="absolute top-4 right-4 z-20 flex flex-col gap-2 transition-all duration-500 ease-in-out"
+        style={{ 
+          transform: selectedProperty ? 'translateX(calc(-450px - 1rem))' : 'translateX(0)' 
+        }}
+      >
+        <TooltipProvider>
+          {/* Theme Selector Dropdown */}
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost" 
+                    size="icon"
+                    className="size-10 bg-glass backdrop-blur-md rounded-full shadow-lg border border-glass-border flex items-center justify-center transition-all hover:bg-glass/80 text-foreground cursor-pointer"
+                  >
+                    <Layers className={`size-5 ${settings.mapTheme !== 'positron' ? 'text-active-icon' : 'text-foreground'}`} />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="font-bold uppercase tracking-widest text-[10px]">
+                {dict.layers.style}
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent side="left" align="start" sideOffset={12} className="bg-glass backdrop-blur-xl border-glass-border rounded-xl shadow-2xl">
+              <DropdownMenuRadioGroup 
+                value={settings.mapTheme || MAP_THEME} 
+                onValueChange={(val) => setSettings(prev => ({ ...prev, mapTheme: val as MapTheme }))}
+              >
+                <DropdownMenuRadioItem value="liberty" className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                  Liberty
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="bright" className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                  Bright
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="positron" className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                  Positron
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Properties Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost" 
+                size="icon"
+                onClick={() => setSettings(prev => ({ ...prev, showProperties: !prev.showProperties }))}
+                className="size-10 bg-glass backdrop-blur-md rounded-full shadow-lg border border-glass-border flex items-center justify-center transition-all hover:bg-glass/80 text-foreground cursor-pointer"
+              >
+                <MapPin className={`size-5 ${settings.showProperties ? 'text-active-icon' : 'text-muted-foreground'}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="font-bold uppercase tracking-widest text-[10px]">
+              {dict.layers.properties}
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Building Layouts Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost" 
+                size="icon"
+                onClick={() => setSettings(prev => ({ ...prev, showBuildingLayouts: !prev.showBuildingLayouts }))}
+                className="size-10 bg-glass backdrop-blur-md rounded-full shadow-lg border border-glass-border flex items-center justify-center transition-all hover:bg-glass/80 text-foreground cursor-pointer"
+              >
+                <LayoutDashboard className={`size-5 ${settings.showBuildingLayouts ? 'text-active-icon' : 'text-muted-foreground'}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="font-bold uppercase tracking-widest text-[10px]">
+              {dict.layers.buildingLayouts}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );
