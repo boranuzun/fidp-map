@@ -14,6 +14,8 @@ describe('MapSidebar', () => {
       color: 'Color',
       properties: 'Properties',
       buildingLayouts: 'Building Layouts',
+      style: 'Style',
+      satellite: 'Satellite'
     }
   };
 

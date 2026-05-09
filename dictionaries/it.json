@@ -46,7 +46,8 @@
       "grayscale": "Scala di grigi",
       "color": "Colore",
       "properties": "Proprietà",
-      "buildingLayouts": "Planimetrie edifici"
+      "buildingLayouts": "Planimetrie edifici",
+      "satellite": "Satellite"
     }
   },
   "about": {

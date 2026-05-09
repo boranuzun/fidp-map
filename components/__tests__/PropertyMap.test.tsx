@@ -30,6 +30,8 @@ describe('PropertyMap', () => {
       color: 'Color',
       properties: 'Properties',
       buildingLayouts: 'Building Layouts',
+      style: 'Style',
+      satellite: 'Satellite'
     }
   };
 

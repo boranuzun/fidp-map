@@ -21,8 +21,29 @@ import {
 import { useLocalStorage } from '../../hooks/use-local-storage';
 import { MapProps, Property } from './types';
 
-export type MapTheme = "liberty" | "bright" | "positron"
+export type MapTheme = "liberty" | "bright" | "positron" | "satellite"
 export const MAP_THEME: MapTheme = "liberty"
+
+const SATELLITE_STYLE = {
+  version: 8,
+  sources: {
+    'arcgis-satellite': {
+      type: 'raster',
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256,
+      attribution: 'Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+    }
+  },
+  layers: [
+    {
+      id: 'satellite-layer',
+      type: 'raster',
+      source: 'arcgis-satellite',
+      minzoom: 0,
+      maxzoom: 22
+    }
+  ]
+};
 
 // Mute MapLibre's persistent "Image could not be loaded" warnings
 if (typeof window !== 'undefined') {
@@ -58,6 +79,34 @@ const THEME_COLORS: Record<MapTheme, string> = {
   liberty: '#5D60BE',
   bright: '#1a73e8',
   positron: '#333333',
+  satellite: '#0ea5e9', // Vibrant Sky Blue for satellite
+};
+
+const pendingPins = new globalThis.Map<string, Promise<HTMLImageElement>>();
+
+const generatePinIcon = (color: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const svg = `
+      <svg width="32" height="42" viewBox="-2 -2 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 0C5.37 0 0 5.37 0 12C0 21 12 32 12 32C12 32 24 21 24 12C24 5.37 18.63 0 12 0Z" fill="${color}" stroke="white" stroke-width="1.5"/>
+        <circle cx="12" cy="12" r="4" fill="white" />
+      </svg>
+    `;
+    
+    const img = new Image();
+    const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(url);
+      reject(err);
+    };
+    img.src = url;
+  });
 };
 
 export default function MapLibreMap({ 
@@ -118,7 +167,11 @@ export default function MapLibreMap({
           ref={mapRef}
           initialViewState={initialViewState}
           style={{ width: '100%', height: '100%' }}
-          mapStyle={`https://tiles.openfreemap.org/styles/${settings.mapTheme || MAP_THEME}`}
+          mapStyle={settings.mapTheme === 'satellite' 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? (SATELLITE_STYLE as any) 
+            : `https://tiles.openfreemap.org/styles/${settings.mapTheme || MAP_THEME}`
+          }
           onClick={(e: MapLayerMouseEvent) => {
             // Only clear selection if we click on the map itself, not a marker
             if (e.target.getCanvas().contains(e.originalEvent.target as Node)) {
@@ -126,9 +179,34 @@ export default function MapLibreMap({
             }
           }}
           onLoad={(e) => {
-            e.target.on('styleimagemissing', (ev: { id: string }) => {
+            e.target.on('styleimagemissing', async (ev: { id: string }) => {
               const id = ev.id;
-              if (!e.target.hasImage(id)) {
+              if (id.startsWith('pin-')) {
+                if (e.target.hasImage(id)) return;
+
+                const theme = id.replace('pin-', '');
+                let color = '#000000'; // Default / selected
+                if (theme === 'satellite') color = '#0ea5e9';
+                else if (THEME_COLORS[theme as MapTheme]) color = THEME_COLORS[theme as MapTheme];
+                
+                try {
+                  let imgPromise = pendingPins.get(id);
+                  if (!imgPromise) {
+                    imgPromise = generatePinIcon(color);
+                    pendingPins.set(id, imgPromise);
+                  }
+                  
+                  const img = await imgPromise;
+                  
+                  if (!e.target.hasImage(id)) {
+                    e.target.addImage(id, img);
+                  }
+                } catch (err) {
+                  console.error(`Failed to generate pin icon for ${id}:`, err);
+                } finally {
+                  pendingPins.delete(id);
+                }
+              } else if (!e.target.hasImage(id)) {
                 e.target.addImage(id, {
                   width: 1,
                   height: 1,
@@ -139,25 +217,27 @@ export default function MapLibreMap({
             });
           }}
         >
-          {/* Inject Building Numbers Layer */}
-          <Layer
-            id="house-numbers"
-            type="symbol"
-            source="openmaptiles"
-            source-layer="housenumber"
-            minzoom={17}
-            layout={{
-              'text-field': '{housenumber}',
-              'text-font': ['Noto Sans Regular'],
-              'text-size': 10,
-              'text-padding': 1,
-            }}
-            paint={{
-              'text-color': 'rgba(0, 0, 0, 0.6)',
-              'text-halo-color': 'rgba(255, 255, 255, 0.8)',
-              'text-halo-width': 1,
-            }}
-          />
+          {/* Inject Building Numbers Layer - only if not in satellite mode */}
+          {settings.mapTheme !== 'satellite' && (
+            <Layer
+              id="house-numbers"
+              type="symbol"
+              source="openmaptiles"
+              source-layer="housenumber"
+              minzoom={17}
+              layout={{
+                'text-field': '{housenumber}',
+                'text-font': ['Noto Sans Regular'],
+                'text-size': 10,
+                'text-padding': 1,
+              }}
+              paint={{
+                'text-color': 'rgba(0, 0, 0, 0.6)',
+                'text-halo-color': 'rgba(255, 255, 255, 0.8)',
+                'text-halo-width': 1,
+              }}
+            />
+          )}
 
           {settings.showProperties && properties.filter(p => p.lat && p.lng).map((p) => {
             const isSelected = selectedProperty?.id === p.id;
@@ -179,16 +259,28 @@ export default function MapLibreMap({
                   <svg 
                     width="32" 
                     height="42" 
-                    viewBox="0 0 24 32" 
+                    viewBox="-2 -2 28 36" // Added padding to prevent stroke clipping
                     fill="none" 
                     xmlns="http://www.w3.org/2000/svg"
                     className="drop-shadow-md"
                   >
                     <path 
                       d="M12 0C5.37 0 0 5.37 0 12C0 21 12 32 12 32C12 32 24 21 24 12C24 5.37 18.63 0 12 0Z" 
-                      fill={isSelected ? '#000000' : THEME_COLORS[settings.mapTheme || MAP_THEME]}
-                      stroke={isSelected ? '#FFFFFF' : 'rgba(255, 255, 255, 0.4)'}
-                      strokeWidth="1.5"
+                      fill={
+                        isSelected 
+                          ? '#000000' 
+                          : settings.mapTheme === 'satellite'
+                            ? '#0ea5e9' // Vibrant Sky Blue for satellite
+                            : THEME_COLORS[settings.mapTheme || MAP_THEME]
+                      }
+                      stroke={
+                        isSelected 
+                          ? '#FFFFFF' 
+                          : settings.mapTheme === 'satellite'
+                            ? '#FFFFFF' // White border for satellite
+                            : 'rgba(255, 255, 255, 0.4)'
+                      }
+                      strokeWidth={settings.mapTheme === 'satellite' ? '2' : '1.5'}
                     />
                     <circle cx="12" cy="12" r="4" fill="white" />
                   </svg>
@@ -271,6 +363,9 @@ export default function MapLibreMap({
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="positron" className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
                   Positron
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="satellite" className="text-[10px] font-black uppercase tracking-widest cursor-pointer">
+                  {dict.layers.satellite}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>

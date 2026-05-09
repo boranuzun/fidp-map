@@ -46,7 +46,8 @@
       "grayscale": "Grayscale",
       "color": "Color",
       "properties": "Properties",
-      "buildingLayouts": "Building Layouts"
+      "buildingLayouts": "Building Layouts",
+      "satellite": "Satellite"
     }
   },
   "about": {

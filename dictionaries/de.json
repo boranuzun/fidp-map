@@ -46,7 +46,8 @@
       "grayscale": "Graustufen",
       "color": "Farbe",
       "properties": "Immobilien",
-      "buildingLayouts": "Gebäudeumrisse"
+      "buildingLayouts": "Gebäudeumrisse",
+      "satellite": "Satellit"
     }
   },
   "about": {

@@ -24,6 +24,7 @@ export interface MapDictionary {
     color: string;
     properties: string;
     buildingLayouts: string;
+    satellite: string;
   };
   dashboard?: {
     searchPlaceholder: string;

@@ -46,7 +46,8 @@
       "grayscale": "Gris",
       "color": "Couleur",
       "properties": "Propriétés",
-      "buildingLayouts": "Emprises bâties"
+      "buildingLayouts": "Emprises bâties",
+      "satellite": "Satellite"
     }
   },
   "about": {
