@@ -11,6 +11,7 @@
   "dashboard": {
     "loadingMap": "Chargement de la carte...",
     "searchPlaceholder": "RECHERCHER DES PROPRIÉTÉS...",
+    "clustering": "GROUPEMENT (CLUSTERING)",
     "groupByLocalite": "GROUPER PAR LOCALITÉ",
     "propertiesCount": "{count} PROPRIÉTÉS",
     "resetFilters": "RÉINITIALISER LES FILTRES",

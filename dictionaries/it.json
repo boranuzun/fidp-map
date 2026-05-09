@@ -11,6 +11,7 @@
   "dashboard": {
     "loadingMap": "Caricamento della mappa...",
     "searchPlaceholder": "CERCA PROPRIETÀ...",
+    "clustering": "RAGGRUPPAMENTO (CLUSTERING)",
     "groupByLocalite": "RAGGRUPPA PER LOCALITÀ",
     "propertiesCount": "{count} PROPRIETÀ",
     "resetFilters": "REIMPOSTA FILTRI",

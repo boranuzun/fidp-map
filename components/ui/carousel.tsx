@@ -28,7 +28,9 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-  handleKeyDown: (event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent) => void
+  handleKeyDown: (
+    event: React.KeyboardEvent<HTMLDivElement> | KeyboardEvent
+  ) => void
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -191,7 +193,7 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute touch-manipulation rounded-none border-2 border-foreground bg-background hover:bg-foreground hover:text-background transition-none z-10",
+        "absolute z-10 touch-manipulation rounded-none border-2 border-foreground bg-background transition-none hover:bg-foreground hover:text-background",
         orientation === "horizontal"
           ? "top-1/2 left-4 -translate-y-1/2"
           : "top-4 left-1/2 -translate-x-1/2 rotate-90",
@@ -199,8 +201,8 @@ function CarouselPrevious({
       )}
       disabled={!canScrollPrev}
       onClick={(e) => {
-        e.stopPropagation();
-        scrollPrev();
+        e.stopPropagation()
+        scrollPrev()
       }}
       {...props}
     >
@@ -224,7 +226,7 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute touch-manipulation rounded-none border-2 border-black bg-white hover:bg-black hover:text-white transition-none z-10",
+        "absolute z-10 touch-manipulation rounded-none border-2 border-black bg-white transition-none hover:bg-black hover:text-white",
         orientation === "horizontal"
           ? "top-1/2 right-4 -translate-y-1/2"
           : "bottom-4 left-1/2 -translate-x-1/2 rotate-90",
@@ -232,8 +234,8 @@ function CarouselNext({
       )}
       disabled={!canScrollNext}
       onClick={(e) => {
-        e.stopPropagation();
-        scrollNext();
+        e.stopPropagation()
+        scrollNext()
       }}
       {...props}
     >

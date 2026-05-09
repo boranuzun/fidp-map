@@ -32,24 +32,20 @@ export default function MapSidebar({
   return (
     <aside
       role="complementary"
-      className="fixed inset-x-4 bottom-4 md:absolute md:top-4 md:left-4 md:bottom-4 md:w-[400px] z-50 bg-glass backdrop-blur-md rounded-2xl shadow-(--glass-shadow) border border-glass-border flex flex-col overflow-hidden transition-all ease-in-out animate-in fade-in slide-in-from-left-8 duration-500"
+      className="fixed inset-x-4 bottom-4 z-50 flex animate-in flex-col overflow-hidden rounded-2xl border border-glass-border bg-glass shadow-(--glass-shadow) backdrop-blur-md transition-all duration-500 ease-in-out fade-in slide-in-from-left-8 md:absolute md:top-4 md:bottom-4 md:left-4 md:w-[400px]"
     >
       {/* Sidebar Header (Logo, etc) */}
-      {header && (
-        <div className="px-4 pt-4 pb-2">
-          {header}
-        </div>
-      )}
+      {header && <div className="px-4 pt-4 pb-2">{header}</div>}
 
       {/* Search Bar */}
-      <div className="p-4 flex gap-2 items-center">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-active-icon transition-colors" />
+      <div className="flex items-center gap-2 p-4">
+        <div className="group relative flex-1">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-active-icon" />
           <Input
             placeholder={dictionary.dashboard?.searchPlaceholder}
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className="pl-10 bg-background/80 placeholder:text-muted-foreground/80 border-transparent focus:bg-background focus:border-active-icon/30 h-12 rounded-xl text-sm font-medium transition-all"
+            className="h-12 rounded-xl border-transparent bg-background/80 pl-10 text-sm font-medium transition-all placeholder:text-muted-foreground/80 focus:border-active-icon/30 focus:bg-background"
           />
         </div>
         <Button
@@ -57,7 +53,7 @@ export default function MapSidebar({
           size="icon"
           onClick={() => setShowFilters(!showFilters)}
           aria-label="Toggle filters"
-          className={`h-12 w-12 rounded-xl border-border transition-all ${showFilters || isFiltered ? 'bg-blue-50 border-blue-200 text-blue-600' : 'hover:bg-muted'}`}
+          className={`h-12 w-12 rounded-xl border-border transition-all ${showFilters || isFiltered ? "border-blue-200 bg-blue-50 text-blue-600" : "hover:bg-muted"}`}
         >
           <SlidersHorizontal className="h-5 w-5" />
         </Button>
@@ -65,15 +61,15 @@ export default function MapSidebar({
 
       {/* Filters Panel */}
       {(showFilters || isFiltered) && filters && (
-        <div className="px-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-4 bg-header rounded-xl space-y-4 border border-border">
+        <div className="animate-in space-y-3 px-4 pb-4 duration-200 fade-in slide-in-from-top-2">
+          <div className="space-y-4 rounded-xl border border-border bg-header p-4">
             {filters}
             <Button
               variant="ghost"
               size="sm"
               onClick={onReset}
               disabled={!isFiltered}
-              className="w-full text-[10px] font-bold uppercase tracking-widest h-8 hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
+              className="h-8 w-full text-[10px] font-bold tracking-widest uppercase hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
             >
               {dictionary.dashboard?.resetFilters}
             </Button>
@@ -82,7 +78,7 @@ export default function MapSidebar({
       )}
 
       {/* Results / Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted hover:scrollbar-thumb-muted-foreground/30">
+      <div className="scrollbar-thin scrollbar-thumb-muted hover:scrollbar-thumb-muted-foreground/30 flex-1 overflow-y-auto">
         {children}
       </div>
     </aside>

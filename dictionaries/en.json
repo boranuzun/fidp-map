@@ -11,6 +11,7 @@
   "dashboard": {
     "loadingMap": "Loading Map...",
     "searchPlaceholder": "SEARCH PROPERTIES...",
+    "clustering": "CLUSTERING",
     "groupByLocalite": "GROUP BY LOCALITÉ",
     "propertiesCount": "{count} PROPERTIES",
     "resetFilters": "RESET FILTERS",

@@ -17,7 +17,10 @@ interface LanguageSwitcherProps {
   currentLang: string
 }
 
-export default function LanguageSwitcher({ dict, currentLang }: LanguageSwitcherProps) {
+export default function LanguageSwitcher({
+  dict,
+  currentLang,
+}: LanguageSwitcherProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -34,11 +37,11 @@ export default function LanguageSwitcher({ dict, currentLang }: LanguageSwitcher
       <DropdownMenu.Trigger asChild>
         <button
           aria-label={dict.common.language}
-          className="flex items-center gap-2 bg-glass backdrop-blur-md border border-glass-border rounded-xl shadow-lg px-3 py-2 font-black uppercase text-[10px] tracking-widest hover:bg-card-hover transition-all cursor-pointer focus:outline-none"
+          className="flex cursor-pointer items-center gap-2 rounded-xl border border-glass-border bg-glass px-3 py-2 text-[10px] font-black tracking-widest uppercase shadow-lg backdrop-blur-md transition-all hover:bg-card-hover focus:outline-none"
         >
-          <Globe className="w-3.5 h-3.5" />
+          <Globe className="h-3.5 w-3.5" />
           <span>{currentLang.toUpperCase()}</span>
-          <ChevronDown className="w-3 h-3 opacity-50" />
+          <ChevronDown className="h-3 w-3 opacity-50" />
         </button>
       </DropdownMenu.Trigger>
 
@@ -46,35 +49,35 @@ export default function LanguageSwitcher({ dict, currentLang }: LanguageSwitcher
         <DropdownMenu.Content
           align="end"
           sideOffset={8}
-          className="z-50 min-w-[120px] bg-glass backdrop-blur-xl border border-glass-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="z-50 min-w-[120px] animate-in overflow-hidden rounded-xl border border-glass-border bg-glass shadow-2xl backdrop-blur-xl duration-200 zoom-in-95 fade-in"
         >
           <DropdownMenu.Item
             onSelect={() => handleLanguageChange("fr")}
-            className="flex items-center justify-between px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-foreground hover:text-background transition-colors focus:outline-none"
+            className="flex cursor-pointer items-center justify-between px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors hover:bg-foreground hover:text-background focus:outline-none"
           >
             <span>{dict.common.french}</span>
-            <span className="opacity-50 text-[8px]">FR</span>
+            <span className="text-[8px] opacity-50">FR</span>
           </DropdownMenu.Item>
           <DropdownMenu.Item
             onSelect={() => handleLanguageChange("en")}
-            className="flex items-center justify-between px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-foreground hover:text-background transition-colors focus:outline-none"
+            className="flex cursor-pointer items-center justify-between px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors hover:bg-foreground hover:text-background focus:outline-none"
           >
             <span>{dict.common.english}</span>
-            <span className="opacity-50 text-[8px]">EN</span>
+            <span className="text-[8px] opacity-50">EN</span>
           </DropdownMenu.Item>
           <DropdownMenu.Item
             onSelect={() => handleLanguageChange("de")}
-            className="flex items-center justify-between px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-foreground hover:text-background transition-colors focus:outline-none"
+            className="flex cursor-pointer items-center justify-between px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors hover:bg-foreground hover:text-background focus:outline-none"
           >
             <span>{dict.common.german}</span>
-            <span className="opacity-50 text-[8px]">DE</span>
+            <span className="text-[8px] opacity-50">DE</span>
           </DropdownMenu.Item>
           <DropdownMenu.Item
             onSelect={() => handleLanguageChange("it")}
-            className="flex items-center justify-between px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-foreground hover:text-background transition-colors focus:outline-none"
+            className="flex cursor-pointer items-center justify-between px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors hover:bg-foreground hover:text-background focus:outline-none"
           >
             <span>{dict.common.italian}</span>
-            <span className="opacity-50 text-[8px]">IT</span>
+            <span className="text-[8px] opacity-50">IT</span>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

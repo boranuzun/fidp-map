@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { 
-  Building2, 
-  MapPin, 
-  Users, 
-  Landmark, 
-  Calendar, 
-  Hash 
+import {
+  Building2,
+  MapPin,
+  Users,
+  Landmark,
+  Calendar,
+  Hash,
 } from "lucide-react"
 import {
   Carousel,
@@ -81,9 +81,8 @@ export default function PropertyDetailsView({
       <div className="flex-1 overflow-y-auto p-8">
         <div className="space-y-10">
           <section>
-            <h4 className="border-b mb-4 flex items-center gap-2 border-border pb-2 text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
-              <MapPin className="h-3.5 w-3.5" />{" "}
-              {dict.details.locationDetails}
+            <h4 className="mb-4 flex items-center gap-2 border-b border-border pb-2 text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
+              <MapPin className="h-3.5 w-3.5" /> {dict.details.locationDetails}
             </h4>
             <div className="space-y-6">
               <div>
@@ -122,12 +121,11 @@ export default function PropertyDetailsView({
           </section>
 
           <section>
-            <h4 className="border-b mb-4 flex items-center gap-2 border-border pb-2 text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
-              <Landmark className="h-3.5 w-3.5" />{" "}
-              {dict.details.mgmtHistory}
+            <h4 className="mb-4 flex items-center gap-2 border-b border-border pb-2 text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
+              <Landmark className="h-3.5 w-3.5" /> {dict.details.mgmtHistory}
             </h4>
             <div className="grid gap-3">
-              <div className="rounded-xl bg-header flex items-center justify-between p-4">
+              <div className="flex items-center justify-between rounded-xl bg-header p-4">
                 <span className="text-[10px] font-bold uppercase opacity-40">
                   {dict.details.fondation}
                 </span>
@@ -136,10 +134,9 @@ export default function PropertyDetailsView({
                 </span>
               </div>
               {property.construction_year && (
-                <div className="rounded-xl bg-header flex items-center justify-between p-4">
+                <div className="flex items-center justify-between rounded-xl bg-header p-4">
                   <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase opacity-40">
-                    <Calendar className="h-3 w-3" />{" "}
-                    {dict.details.construction}
+                    <Calendar className="h-3 w-3" /> {dict.details.construction}
                   </span>
                   <span className="text-sm font-black uppercase">
                     {dict.details.builtIn.replace(
@@ -149,7 +146,7 @@ export default function PropertyDetailsView({
                   </span>
                 </div>
               )}
-              <div className="rounded-xl bg-header flex items-center justify-between p-4">
+              <div className="flex items-center justify-between rounded-xl bg-header p-4">
                 <span className="text-[10px] font-bold uppercase opacity-40">
                   {dict.details.group}
                 </span>
@@ -162,14 +159,14 @@ export default function PropertyDetailsView({
 
           {property.tags && property.tags.length > 0 && (
             <section>
-              <h4 className="border-b mb-4 flex items-center gap-2 border-border pb-2 text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
+              <h4 className="mb-4 flex items-center gap-2 border-b border-border pb-2 text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">
                 <Hash className="h-3.5 w-3.5" /> {dict.details.tags}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {property.tags.map((tag) => (
                   <div
                     key={tag}
-                    className="bg-secondary rounded px-2 py-1 text-[9px] font-black tracking-wider text-secondary-foreground uppercase"
+                    className="rounded bg-secondary px-2 py-1 text-[9px] font-black tracking-wider text-secondary-foreground uppercase"
                   >
                     {tag}
                   </div>
@@ -185,7 +182,7 @@ export default function PropertyDetailsView({
           href={property.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center bg-blue-600 rounded-xl py-4 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:bg-blue-700 shadow-lg"
+          className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-4 text-xs font-black tracking-[0.2em] text-white uppercase shadow-lg transition-all hover:bg-blue-700"
         >
           {dict.dashboard.visitSite}
         </a>

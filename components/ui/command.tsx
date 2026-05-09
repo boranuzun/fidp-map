@@ -11,10 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  InputGroup,
-  InputGroupAddon,
-} from "@/components/ui/input-group"
+import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import { SearchIcon, CheckIcon } from "lucide-react"
 
 function Command({
@@ -75,8 +72,16 @@ function CommandInput({
   containerClassName?: string
 }) {
   return (
-    <div data-slot="command-input-wrapper" className={cn("p-1 pb-0", containerClassName)}>
-      <InputGroup className={cn("h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!", wrapperClassName)}>
+    <div
+      data-slot="command-input-wrapper"
+      className={cn("p-1 pb-0", containerClassName)}
+    >
+      <InputGroup
+        className={cn(
+          "h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!",
+          wrapperClassName
+        )}
+      >
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(

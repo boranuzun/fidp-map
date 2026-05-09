@@ -25,21 +25,21 @@ export default function PropertyDetailsSidebar({
   return (
     <aside
       role="complementary"
-      className="fixed md:absolute top-4 right-4 bottom-4 w-[calc(100%-2rem)] md:w-[450px] z-50 bg-glass backdrop-blur-md rounded-2xl shadow-(--glass-shadow) border border-glass-border flex flex-col overflow-hidden transition-all ease-in-out animate-in fade-in slide-in-from-right-8 duration-500"
+      className="fixed top-4 right-4 bottom-4 z-50 flex w-[calc(100%-2rem)] animate-in flex-col overflow-hidden rounded-2xl border border-glass-border bg-glass shadow-(--glass-shadow) backdrop-blur-md transition-all duration-500 ease-in-out fade-in slide-in-from-right-8 md:absolute md:w-[450px]"
     >
-      <div className="absolute right-4 top-4 z-10">
+      <div className="absolute top-4 right-4 z-10">
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
           aria-label="Close"
-          className="h-10 w-10 rounded-xl bg-black/20 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white cursor-pointer"
+          className="h-10 w-10 cursor-pointer rounded-xl bg-black/20 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
         >
           <X className="h-5 w-5" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted hover:scrollbar-thumb-muted-foreground/30">
+      <div className="scrollbar-thin scrollbar-thumb-muted hover:scrollbar-thumb-muted-foreground/30 flex-1 overflow-y-auto">
         <PropertyDetailsView
           property={property}
           dict={dict}

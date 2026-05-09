@@ -1,11 +1,15 @@
-import { i18n, type Locale } from '@/i18n-config'
+import { i18n, type Locale } from "@/i18n-config"
 import { Inter, Geist_Mono } from "next/font/google"
 
 import "../globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', weight: ['400', '700', '900'] })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["400", "700", "900"],
+})
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],

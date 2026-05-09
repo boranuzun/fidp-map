@@ -21,21 +21,17 @@ import { Label } from "./ui/label"
 import MapSidebar from "./map/MapSidebar"
 import PropertyDetailsSidebar from "./map/PropertyDetailsSidebar"
 import { type Property } from "./PropertyMap"
-import {
-  Building2,
-  MapPin,
-  Globe,
-  Layers,
-} from "lucide-react"
+import { Building2, MapPin, Globe, Layers } from "lucide-react"
 import logo from "../public/fidp-logo.webp"
 
 const MapPlaceholder = () => {
   const params = useParams()
   const lang = params?.lang as string
-  const loadingText = lang === "fr" ? "Chargement de la carte..." : "Loading Map..."
+  const loadingText =
+    lang === "fr" ? "Chargement de la carte..." : "Loading Map..."
 
   return (
-    <div className="flex h-full w-full animate-pulse items-center justify-center bg-muted text-muted-foreground font-bold uppercase tracking-widest text-[10px]">
+    <div className="flex h-full w-full animate-pulse items-center justify-center bg-muted text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
       {loadingText}
     </div>
   )
@@ -137,11 +133,11 @@ export default function DashboardClient({
     setGroupByLocalite(false)
   }
 
-  const isFiltered = 
-    search !== "" || 
-    selectedLocalites.length !== allLocalites.length || 
+  const isFiltered =
+    search !== "" ||
+    selectedLocalites.length !== allLocalites.length ||
     selectedFondations.length !== allFondations.length ||
-    groupByLocalite;
+    groupByLocalite
 
   const properties = initialProperties
 
@@ -189,7 +185,12 @@ export default function DashboardClient({
     return Object.fromEntries(
       Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
     )
-  }, [filtered, groupByLocalite, dict.dashboard.allProperties, dict.dashboard.unknownLocalite])
+  }, [
+    filtered,
+    groupByLocalite,
+    dict.dashboard.allProperties,
+    dict.dashboard.unknownLocalite,
+  ])
 
   const renderPropertyCard = (p: Property) => (
     <div
@@ -201,8 +202,8 @@ export default function DashboardClient({
       onClick={() => setSelectedProperty(p)}
       onMouseEnter={() => prefetchImages(p.images)}
       className={`group cursor-pointer border-b border-border p-6 transition-all duration-200 ease-out ${
-        selectedProperty?.id === p.id 
-          ? "bg-primary text-primary-foreground shadow-xl z-10 relative" 
+        selectedProperty?.id === p.id
+          ? "relative z-10 bg-primary text-primary-foreground shadow-xl"
           : "hover:bg-card-hover active:bg-muted"
       }`}
     >
@@ -248,7 +249,7 @@ export default function DashboardClient({
         header={
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center overflow-hidden relative">
+              <div className="relative flex h-8 w-8 items-center justify-center overflow-hidden">
                 <Image
                   src={logo}
                   alt="FIDP Logo"
@@ -266,7 +267,7 @@ export default function DashboardClient({
               <ModeToggle />
               <Link
                 href={`/${lang}/about`}
-                className="flex size-9 items-center justify-center bg-glass backdrop-blur-md border border-glass-border rounded-xl shadow-lg text-lg font-medium transition-all hover:bg-muted cursor-pointer"
+                className="flex size-9 cursor-pointer items-center justify-center rounded-xl border border-glass-border bg-glass text-lg font-medium shadow-lg backdrop-blur-md transition-all hover:bg-muted"
                 title={dict.common.about}
               >
                 ?
@@ -313,19 +314,21 @@ export default function DashboardClient({
         }
       >
         <div className="divide-y divide-border">
-          <div className="px-6 py-3 bg-header flex items-center justify-between">
+          <div className="flex items-center justify-between bg-header px-6 py-3">
             <h2 className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
-              {filtered.length} {dict.dashboard.propertiesCount.split('{count}')[1].trim() || 'RESULTS'}
+              {filtered.length}{" "}
+              {dict.dashboard.propertiesCount.split("{count}")[1].trim() ||
+                "RESULTS"}
             </h2>
           </div>
-          
+
           {filtered.length > 0 ? (
             <div className="divide-y divide-border">
               {Object.entries(groupedProperties).map(
                 ([groupName, groupItems]) => (
                   <div key={groupName}>
                     {groupByLocalite && (
-                      <div className="sticky top-0 z-10 flex items-center gap-2 bg-header/90 backdrop-blur-sm px-5 py-2 border-y border-border">
+                      <div className="sticky top-0 z-10 flex items-center gap-2 border-y border-border bg-header/90 px-5 py-2 backdrop-blur-sm">
                         <Layers className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
                           {groupName}
@@ -376,7 +379,7 @@ export default function DashboardClient({
             selectedProperty.images && selectedProperty.images.length > 0 ? (
               <div className="relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-transparent">
                 {/* Header Info */}
-                <div className="pointer-events-none absolute top-6 left-1/2 z-2010 -translate-x-1/2 border border-white/20 backdrop-blur-md bg-black/80 px-6 py-2 rounded-xl text-sm font-black tracking-[0.2em] text-white uppercase shadow-2xl">
+                <div className="pointer-events-none absolute top-6 left-1/2 z-2010 -translate-x-1/2 rounded-xl border border-white/20 bg-black/80 px-6 py-2 text-sm font-black tracking-[0.2em] text-white uppercase shadow-2xl backdrop-blur-md">
                   {selectedProperty.name || selectedProperty.address}
                 </div>
 
@@ -410,8 +413,8 @@ export default function DashboardClient({
                   {/* Explicit Navigation Controls */}
                   {selectedProperty.images.length > 1 && (
                     <>
-                      <CarouselPrevious className="left-8 z-2015 size-20 border-white/20 bg-black/50 text-white transition-all hover:bg-white hover:text-black rounded-2xl" />
-                      <CarouselNext className="right-8 z-2015 size-20 border-white/20 bg-black/50 text-white transition-all hover:bg-white hover:text-black rounded-2xl" />
+                      <CarouselPrevious className="left-8 z-2015 size-20 rounded-2xl border-white/20 bg-black/50 text-white transition-all hover:bg-white hover:text-black" />
+                      <CarouselNext className="right-8 z-2015 size-20 rounded-2xl border-white/20 bg-black/50 text-white transition-all hover:bg-white hover:text-black" />
                     </>
                   )}
                 </Carousel>

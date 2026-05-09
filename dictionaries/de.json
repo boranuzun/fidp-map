@@ -11,6 +11,7 @@
   "dashboard": {
     "loadingMap": "Karte wird geladen...",
     "searchPlaceholder": "IMMOBILIEN SUCHEN...",
+    "clustering": "CLUSTERING",
     "groupByLocalite": "NACH ORTSCHAFT GRUPPIEREN",
     "propertiesCount": "{count} IMMOBILIEN",
     "resetFilters": "FILTER ZURÜCKSETZEN",
