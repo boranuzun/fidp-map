@@ -25,7 +25,7 @@ export default function PropertyDetailsSidebar({
   return (
     <aside
       role="complementary"
-      className="fixed top-4 right-4 bottom-4 z-50 flex w-[calc(100%-2rem)] animate-in flex-col overflow-hidden rounded-2xl border border-glass-border bg-glass shadow-(--glass-shadow) backdrop-blur-md transition-all duration-500 ease-in-out fade-in slide-in-from-right-8 md:absolute md:w-[450px]"
+      className="fixed top-4 right-4 bottom-4 z-50 flex w-[calc(100%-2rem)] animate-in flex-col overflow-hidden rounded-[4px] border border-glass-border bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all duration-500 ease-in-out fade-in slide-in-from-right-8 md:absolute md:w-[450px]"
     >
       <div className="absolute top-4 right-4 z-10">
         <Button
@@ -33,7 +33,7 @@ export default function PropertyDetailsSidebar({
           size="icon"
           onClick={onClose}
           aria-label="Close"
-          className="h-10 w-10 cursor-pointer rounded-xl bg-black/20 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+          className="h-10 w-10 cursor-pointer rounded-[4px] bg-black/20 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
         >
           <X className="h-5 w-5" />
         </Button>

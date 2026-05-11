@@ -4,6 +4,8 @@ import { type Property } from "@/components/PropertyMap"
 import { getDictionary } from "@/lib/get-dictionary"
 import { Locale } from "@/i18n-config"
 
+export const dynamic = "force-dynamic"
+
 export default async function Page({
   params,
 }: {
@@ -12,33 +14,50 @@ export default async function Page({
   const { lang } = await params
   const dict = await getDictionary(lang)
   const rs = await db.execute("SELECT * FROM property")
-  // Sanitize rows to plain objects for React Server Components serialization
+
+  // Explicitly map rows to Property objects
   const properties = rs.rows.map((row) => {
-    const p = { ...row } as unknown as Property & {
-      images: string | string[]
-      tags: string | string[]
+    const p: any = {
+      id: row.id,
+      name: row.name,
+      fondation: row.fondation,
+      localite: row.localite,
+      zip: row.zip,
+      address1: row.address1,
+      address2: row.address2,
+      units: row.units,
+      group: row.group,
+      url: row.url,
+      lat: row.lat,
+      lng: row.lng,
+      geometry: row.geometry,
+      construction_year: row.construction_year,
+      scraped_at: row.scraped_at,
     }
+
     // Parse JSON columns
-    if (typeof p.images === "string") {
+    if (typeof row.images === "string") {
       try {
-        p.images = JSON.parse(p.images)
+        p.images = JSON.parse(row.images)
       } catch {
         p.images = []
       }
-    } else if (!p.images) {
-      p.images = []
+    } else {
+      p.images = (row.images as string[]) || []
     }
-    if (typeof p.tags === "string") {
+
+    if (typeof row.tags === "string") {
       try {
-        p.tags = JSON.parse(p.tags)
+        p.tags = JSON.parse(row.tags)
       } catch {
         p.tags = []
       }
-    } else if (!p.tags) {
-      p.tags = []
+    } else {
+      p.tags = (row.tags as string[]) || []
     }
-    return p
-  }) as unknown as Property[]
+
+    return p as Property
+  })
 
   return <DashboardClient initialProperties={properties} dict={dict} />
 }

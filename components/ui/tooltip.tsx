@@ -38,12 +38,14 @@ function TooltipContent({
   className,
   sideOffset = 4,
   showArrow = false,
+  container,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content> & {
   showArrow?: boolean
+  container?: HTMLElement | null
 }) {
   return (
-    <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Portal container={container}>
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         sideOffset={sideOffset}

@@ -7,7 +7,8 @@ describe("PropertyDetailsView", () => {
   const mockProperty = {
     id: 1,
     name: "Test Property",
-    address: "123 Test St",
+    address1: "123 Test St",
+    address2: "Suite 100",
     localite: "Geneva",
     fondation: "Test Fondation",
     units: 5,
@@ -46,6 +47,7 @@ describe("PropertyDetailsView", () => {
 
     expect(screen.getByText("Test Property")).toBeInTheDocument()
     expect(screen.getByText("123 Test St")).toBeInTheDocument()
+    expect(screen.getByText("Suite 100")).toBeInTheDocument()
     expect(screen.getByText("Geneva")).toBeInTheDocument()
     expect(screen.getByText("Test Fondation")).toBeInTheDocument()
     expect(screen.getByText("5")).toBeInTheDocument()

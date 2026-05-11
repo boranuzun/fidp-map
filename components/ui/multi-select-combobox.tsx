@@ -56,7 +56,7 @@ export function MultiSelectCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className={cn("cursor-pointer", className)}>
-          <InputGroup className="border-swiss h-10 rounded-none border-border bg-background transition-colors hover:bg-muted">
+          <InputGroup className="border-swiss h-10 rounded-[4px] border-border bg-background transition-colors hover:bg-muted">
             <InputGroupAddon className="pr-2 pl-3 text-foreground">
               <Icon className="size-4" />
             </InputGroupAddon>
@@ -73,10 +73,10 @@ export function MultiSelectCombobox({
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[240px] overflow-hidden rounded-none border-2 border-border p-0 shadow-none"
+        className="w-[240px] overflow-hidden rounded-[4px] border-2 border-border p-0 shadow-none"
         align="start"
       >
-        <Command className="overflow-hidden rounded-none bg-background p-0">
+        <Command className="overflow-hidden rounded-[4px] bg-background p-0">
           <div className="flex flex-col border-b-2 border-border">
             <CommandInput
               placeholder={`SEARCH ${placeholder}...`}

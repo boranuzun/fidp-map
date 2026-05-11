@@ -23,7 +23,7 @@
     "unknownLocalite": "Sconosciuto",
     "filteredResults": "Risultati filtrati ({count})",
     "noMatch": "Nessuna proprietà corrisponde ai tuoi filtri.",
-    "visitSite": "Visita il sito ufficiale"
+    "visitSite": "fidp.ch"
   },
   "details": {
     "noPhoto": "Nessuna foto disponibile",
@@ -31,6 +31,7 @@
     "fullAddress": "Indirizzo completo",
     "localite": "Località",
     "notAvailable": "N/D",
+    "googleMaps": "Google Maps",
     "units": "Unità",
     "unknown": "Sconosciuto",
     "mgmtHistory": "Gestione e Storia",

@@ -13,7 +13,7 @@ const mockProperties: Property[] = [
   {
     id: 1,
     name: "Property A",
-    address: "Address 1",
+    address1: "Address 1",
     localite: "Localite 1",
     fondation: "Fondation 1",
     units: 10,
@@ -23,7 +23,7 @@ const mockProperties: Property[] = [
   {
     id: 2,
     name: "Property B",
-    address: "Address 2",
+    address1: "Address 2",
     localite: "Localite 2",
     fondation: "Fondation 2",
     units: 20,

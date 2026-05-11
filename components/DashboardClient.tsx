@@ -155,20 +155,24 @@ export default function DashboardClient({
     return properties
       .filter((p) => {
         const name = p.name || ""
-        const address = p.address || ""
+        const address1 = p.address1 || ""
+        const address2 = p.address2 || ""
         const localite = p.localite || ""
         const fondation = p.fondation || ""
 
         const matchSearch =
           name.toLowerCase().includes(search.toLowerCase()) ||
-          address.toLowerCase().includes(search.toLowerCase())
+          address1.toLowerCase().includes(search.toLowerCase()) ||
+          address2.toLowerCase().includes(search.toLowerCase())
 
         const matchLocalite = selectedLocalites.includes(localite)
         const matchFondation = selectedFondations.includes(fondation)
 
         return matchSearch && matchLocalite && matchFondation
       })
-      .sort((a, b) => (a.name || a.address).localeCompare(b.name || b.address))
+      .sort((a, b) =>
+        (a.name || a.address1).localeCompare(b.name || b.address1)
+      )
   }, [search, selectedLocalites, selectedFondations, properties])
 
   const groupedProperties = useMemo(() => {
@@ -208,11 +212,20 @@ export default function DashboardClient({
       }`}
     >
       <h3 className="text-sm leading-none font-black uppercase">
-        {p.name || p.address}
+        {p.name || p.address1}
       </h3>
       <div className="mt-2 flex items-start gap-1.5 opacity-60">
         <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-        <p className="text-[10px] leading-relaxed font-medium">{p.address}</p>
+        <div className="flex flex-col">
+          <p className="text-[10px] leading-relaxed font-medium">
+            {p.address1}
+          </p>
+          {p.address2 && (
+            <p className="text-[10px] leading-relaxed font-medium opacity-70">
+              {p.address2}
+            </p>
+          )}
+        </div>
       </div>
       {p.localite && !groupByLocalite && (
         <div className="mt-3 flex gap-2">
@@ -298,7 +311,7 @@ export default function DashboardClient({
                 placeholder={dict.dashboard.localites}
                 allLabel={dict.dashboard.allLocalites}
                 icon={MapPin}
-                className="w-full bg-background"
+                className="w-full rounded-[4px] bg-background"
               />
               <MultiSelectCombobox
                 options={allFondations}
@@ -307,7 +320,7 @@ export default function DashboardClient({
                 placeholder={dict.dashboard.fondations}
                 allLabel={dict.dashboard.allFondations}
                 icon={Building2}
-                className="w-full bg-background"
+                className="w-full rounded-[4px] bg-background"
               />
             </div>
           </div>
@@ -380,7 +393,7 @@ export default function DashboardClient({
               <div className="relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-transparent">
                 {/* Header Info */}
                 <div className="pointer-events-none absolute top-6 left-1/2 z-2010 -translate-x-1/2 rounded-xl border border-white/20 bg-black/80 px-6 py-2 text-sm font-black tracking-[0.2em] text-white uppercase shadow-2xl backdrop-blur-md">
-                  {selectedProperty.name || selectedProperty.address}
+                  {selectedProperty.name || selectedProperty.address1}
                 </div>
 
                 {/* Main Carousel Area */}
@@ -400,7 +413,7 @@ export default function DashboardClient({
                         <div className="relative flex h-full w-full items-center justify-center p-4 md:p-20">
                           <Image
                             src={img}
-                            alt={`${selectedProperty.name || selectedProperty.address} - Full Photo ${index + 1}`}
+                            alt={`${selectedProperty.name || selectedProperty.address1} - Full Photo ${index + 1}`}
                             fill
                             unoptimized
                             className="object-contain"

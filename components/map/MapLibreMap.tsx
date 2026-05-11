@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Map, {
   Source,
   Layer,
@@ -164,10 +164,18 @@ export default function MapLibreMap({
   dict,
 }: MapProps) {
   const mapRef = useRef<MapRef>(null)
+  const [mapContainer, setMapContainer] = useState<HTMLElement | null>(null)
   const [settings, setSettings] = useLocalStorage<MapSettings>(
     "fidp-map-settings",
     DEFAULT_SETTINGS
   )
+
+  // Capture map container when it's ready
+  useEffect(() => {
+    if (mapRef.current) {
+      setMapContainer(mapRef.current.getMap().getContainer())
+    }
+  }, [])
 
   const initialViewState = {
     longitude: 6.1432,
@@ -229,119 +237,97 @@ export default function MapLibreMap({
     [properties]
   )
 
-  const onMapClick = async (e: MapLayerMouseEvent) => {
-    const cluster = e.features?.find(
-      (f) =>
-        f.layer.id === "cluster-outer" ||
-        f.layer.id === "clusters" ||
-        f.layer.id === "cluster-count" ||
-        f.layer.id === "cluster-shadow" ||
-        f.layer.id === "cluster-glow"
-    )
-    if (cluster) {
-      const clusterId = cluster.properties?.cluster_id
-      const pointCount = cluster.properties?.point_count
-      const map = mapRef.current?.getMap()
-      const source = (map?.getSource("properties-points-clustered") ||
-        map?.getSource(
-          "properties-points-unclustered"
-        )) as maplibregl.GeoJSONSource
+  const onMapClick = useCallback(
+    async (e: MapLayerMouseEvent) => {
+      const cluster = e.features?.find(
+        (f) =>
+          f.layer.id === "cluster-outer" ||
+          f.layer.id === "clusters" ||
+          f.layer.id === "cluster-count" ||
+          f.layer.id === "cluster-shadow" ||
+          f.layer.id === "cluster-glow"
+      )
+      if (cluster) {
+        const clusterId = cluster.properties?.cluster_id
+        const map = mapRef.current?.getMap()
+        const source = map?.getSource(
+          "properties-points-source"
+        ) as maplibregl.GeoJSONSource
 
-      if (!source) return
+        if (!source || typeof source.getClusterExpansionZoom !== "function")
+          return
 
-      try {
-        const features = await source.getClusterLeaves(clusterId, pointCount, 0)
-
-        if (!features || !features.length) {
-          throw new Error("No features")
-        }
-
-        let minLng = 180,
-          maxLng = -180,
-          minLat = 90,
-          maxLat = -90
-        for (const f of features) {
-          const [lng, lat] = (f.geometry as GeoJSON.Point).coordinates
-          if (lng < minLng) minLng = lng
-          if (lng > maxLng) maxLng = lng
-          if (lat < minLat) minLat = lat
-          if (lat > maxLat) maxLat = lat
-        }
-
-        if (minLng === maxLng && minLat === maxLat) {
-          map?.flyTo({
-            center: [minLng, minLat],
-            zoom: 18,
-            padding: { left: 420, right: 470, top: 50, bottom: 50 },
-            essential: true,
-          })
-        } else {
-          map?.fitBounds(
-            [
-              [minLng, minLat],
-              [maxLng, maxLat],
-            ],
-            {
-              padding: { left: 450, right: 500, top: 100, bottom: 100 },
-              maxZoom: 18,
-              duration: 1000,
-            }
-          )
-        }
-      } catch {
-        // Fallback to basic expansion zoom
         try {
-          const zoom = await source.getClusterExpansionZoom(clusterId)
+          const expansionZoom = await source.getClusterExpansionZoom(clusterId)
+          const currentZoom = map?.getZoom() || 0
+
+          // Calculate a target zoom that is at least expansionZoom + 1 to ensure clusters break apart,
+          // but don't go below the current zoom level.
+          const targetZoom = Math.max(expansionZoom + 1, currentZoom + 1.5)
+
           map?.flyTo({
-            center: (cluster.geometry as GeoJSON.Point).coordinates,
-            zoom: zoom + 1,
-            padding: { left: 400, right: 450, top: 100, bottom: 100 },
+            center: (cluster.geometry as GeoJSON.Point).coordinates as [
+              number,
+              number,
+            ],
+            zoom: targetZoom,
+            padding: {
+              left: 400,
+              right: selectedProperty ? 450 : 0,
+              top: 0,
+              bottom: 0,
+            },
             essential: true,
+            duration: 800,
           })
-        } catch (err2) {
-          console.error("Failed to zoom to cluster", err2)
+        } catch (err) {
+          console.error("Failed to zoom to cluster", err)
+        }
+        return // Don't process other clicks
+      }
+
+      const pin = e.features?.find((f) => f.layer.id === "unclustered-point")
+      if (pin) {
+        const propertyId = pin.properties?.id
+        const property = properties.find((p) => p.id === propertyId)
+        if (property) {
+          onSelect(property)
+        }
+        return // Don't process other clicks
+      }
+
+      // Clear selection if clicking empty space
+      // We check if it's the actual map canvas to avoid clearing when clicking controls
+      if (e.target.getCanvas().contains(e.originalEvent.target as Node)) {
+        onSelect(null as unknown as Property)
+      }
+    },
+    [properties, onSelect, selectedProperty]
+  )
+
+  const onMouseEnter = useCallback(
+    (e: MapLayerMouseEvent) => {
+      if (mapRef.current) {
+        mapRef.current.getMap().getCanvas().style.cursor = "pointer"
+      }
+
+      const pin = e.features?.find((f) => f.layer.id === "unclustered-point")
+      if (pin && onHover) {
+        const propertyId = pin.properties?.id
+        const property = properties.find((p) => p.id === propertyId)
+        if (property) {
+          onHover(property)
         }
       }
-      return // Don't process other clicks
-    }
+    },
+    [properties, onHover]
+  )
 
-    const pin = e.features?.find((f) => f.layer.id === "unclustered-point")
-    if (pin) {
-      const propertyId = pin.properties?.id
-      const property = properties.find((p) => p.id === propertyId)
-      if (property) {
-        onSelect(property)
-      }
-      return // Don't process other clicks
-    }
-
-    // Clear selection if clicking empty space
-    // We check if it's the actual map canvas to avoid clearing when clicking controls
-    if (e.target.getCanvas().contains(e.originalEvent.target as Node)) {
-      onSelect(null as unknown as Property)
-    }
-  }
-
-  const onMouseEnter = (e: MapLayerMouseEvent) => {
-    if (mapRef.current) {
-      mapRef.current.getMap().getCanvas().style.cursor = "pointer"
-    }
-
-    const pin = e.features?.find((f) => f.layer.id === "unclustered-point")
-    if (pin && onHover) {
-      const propertyId = pin.properties?.id
-      const property = properties.find((p) => p.id === propertyId)
-      if (property) {
-        onHover(property)
-      }
-    }
-  }
-
-  const onMouseLeave = () => {
+  const onMouseLeave = useCallback(() => {
     if (mapRef.current) {
       mapRef.current.getMap().getCanvas().style.cursor = ""
     }
-  }
+  }, [])
 
   const isClusteringEnabled = settings.clusteringEnabled ?? true
 
@@ -350,23 +336,61 @@ export default function MapLibreMap({
       {/* Offset MapLibre controls to clear the 400px sidebar, but only when not in fullscreen */}
       <style>{`
         .maplibregl-ctrl-top-left,
-        .maplibregl-ctrl-bottom-left {
-          left: 410px !important;
+        .maplibregl-ctrl-bottom-left,
+        .custom-map-controls {
+          left: 410px !important; /* Edge of 400px sidebar + 10px offset */
+          margin: 0 !important;
+          padding: 0 !important;
+          margin-left: 12px !important; /* Consistent 12px gap from sidebar edge */
           transition: left 0.3s ease-in-out;
         }
         .maplibregl-ctrl-top-left {
-          top: 10px !important;
+          top: 16px !important;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .maplibregl-ctrl-group,
+        .maplibregl-ctrl {
+          margin: 0 !important;
+          border: none !important;
+          background: none !important;
+        }
+        .maplibregl-ctrl-group {
+          border-radius: 4px !important;
+          background-color: var(--glass-bg) !important;
+          backdrop-filter: blur(12px) !important;
+          -webkit-backdrop-filter: blur(12px) !important;
+          box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
+          overflow: hidden;
+          width: 29px !important;
+        }
+        .maplibregl-ctrl-group button {
+          width: 29px !important;
+          height: 29px !important;
+        }
+        .dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+          filter: invert(1) brightness(1.8);
+        }
+        .custom-map-controls {
+          top: 190px !important; /* Perfectly calculated to sit below NavigationControl */
+          position: absolute;
+          z-index: 20;
+          width: 29px !important;
         }
         .maplibregl-ctrl-bottom-left {
-          bottom: 10px !important;
+          bottom: 12px !important;
         }
 
         /* Reset offsets when the map container is in fullscreen mode */
         .maplibregl-canvas-container:fullscreen .maplibregl-ctrl-top-left,
         .maplibregl-canvas-container:fullscreen .maplibregl-ctrl-bottom-left,
+        .maplibregl-canvas-container:fullscreen .custom-map-controls,
         .maplibregl-map:fullscreen .maplibregl-ctrl-top-left,
-        .maplibregl-map:fullscreen .maplibregl-ctrl-bottom-left {
-          left: 10px !important;
+        .maplibregl-map:fullscreen .maplibregl-ctrl-bottom-left,
+        .maplibregl-map:fullscreen .custom-map-controls {
+          left: 0px !important;
+          margin-left: 12px !important;
         }
       `}</style>
       <div className="h-full w-full">
@@ -374,7 +398,14 @@ export default function MapLibreMap({
           ref={mapRef}
           initialViewState={initialViewState}
           style={{ width: "100%", height: "100%" }}
-          interactiveLayerIds={["clusters", "unclustered-point"]}
+          interactiveLayerIds={[
+            "clusters",
+            "cluster-count",
+            "cluster-outer",
+            "cluster-glow",
+            "cluster-shadow",
+            "unclustered-point",
+          ]}
           mapStyle={
             settings.mapTheme === "satellite"
               ? (SATELLITE_STYLE as maplibregl.StyleSpecification)
@@ -459,16 +490,8 @@ export default function MapLibreMap({
           {/* Render clustered points when showProperties is true. Legacy markers were removed for performance. */}
           {settings.showProperties && (
             <Source
-              id={
-                isClusteringEnabled
-                  ? "properties-points-clustered"
-                  : "properties-points-unclustered"
-              }
-              key={
-                isClusteringEnabled
-                  ? "properties-points-clustered"
-                  : "properties-points-unclustered"
-              }
+              key={isClusteringEnabled ? "clustered" : "unclustered"}
+              id="properties-points-source"
               type="geojson"
               data={pointGeojsonData}
               cluster={isClusteringEnabled}
@@ -631,172 +654,174 @@ export default function MapLibreMap({
               />
             </Source>
           )}
-        </Map>
-      </div>
 
-      {/* Floating Glassy Map Controls */}
-      <div
-        className="absolute top-4 right-4 z-20 flex flex-col gap-2 transition-all duration-500 ease-in-out"
-        style={{
-          transform: selectedProperty
-            ? "translateX(calc(-450px - 1rem))"
-            : "translateX(0)",
-        }}
-      >
-        <TooltipProvider>
-          {/* Theme Selector Dropdown */}
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-foreground shadow-lg backdrop-blur-md transition-all hover:bg-glass/80"
+          {/* Custom Map Controls - Placed inside Map to survive fullscreen */}
+          <div className="custom-map-controls pointer-events-none">
+            <div className="pointer-events-auto flex w-[29px] flex-col divide-y divide-border/50 overflow-hidden rounded-[4px] bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md">
+              <TooltipProvider>
+                {/* Theme Selector */}
+                <DropdownMenu>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={dict.layers.style}
+                          className="flex h-[29px] w-[29px] cursor-pointer items-center justify-center rounded-none bg-transparent p-0 transition-colors hover:bg-muted"
+                        >
+                          <Layers className="size-[15px] text-foreground/80" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      container={mapContainer || undefined}
+                      className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                    >
+                      {dict.layers.style}
+                    </TooltipContent>
+                  </Tooltip>
+                  <DropdownMenuContent
+                    side="right"
+                    align="start"
+                    sideOffset={12}
+                    container={mapContainer || undefined}
+                    className="rounded-[4px] border-none bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
                   >
-                    <Layers
-                      className={`size-5 ${settings.mapTheme !== "positron" ? "text-active-icon" : "text-foreground"}`}
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent
-                side="left"
-                className="text-[10px] font-bold tracking-widest uppercase"
-              >
-                {dict.layers.style}
-              </TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent
-              side="left"
-              align="start"
-              sideOffset={12}
-              className="rounded-xl border-glass-border bg-glass shadow-2xl backdrop-blur-xl"
-            >
-              <DropdownMenuRadioGroup
-                value={settings.mapTheme || MAP_THEME}
-                onValueChange={(val) =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    mapTheme: val as MapTheme,
-                  }))
-                }
-              >
-                <DropdownMenuRadioItem
-                  value="liberty"
-                  className="cursor-pointer text-[10px] font-black tracking-widest uppercase"
-                >
-                  Liberty
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="bright"
-                  className="cursor-pointer text-[10px] font-black tracking-widest uppercase"
-                >
-                  Bright
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="positron"
-                  className="cursor-pointer text-[10px] font-black tracking-widest uppercase"
-                >
-                  Positron
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="osm"
-                  className="cursor-pointer text-[10px] font-black tracking-widest uppercase"
-                >
-                  OSM
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="satellite"
-                  className="cursor-pointer text-[10px] font-black tracking-widest uppercase"
-                >
-                  {dict.layers.satellite}
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    <DropdownMenuRadioGroup
+                      value={settings.mapTheme || MAP_THEME}
+                      onValueChange={(val) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          mapTheme: val as MapTheme,
+                        }))
+                      }
+                    >
+                      <DropdownMenuRadioItem
+                        value="liberty"
+                        className="cursor-pointer rounded-[2px] text-[10px] font-black tracking-widest uppercase"
+                      >
+                        Liberty
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="bright"
+                        className="cursor-pointer rounded-[2px] text-[10px] font-black tracking-widest uppercase"
+                      >
+                        Bright
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="positron"
+                        className="cursor-pointer rounded-[2px] text-[10px] font-black tracking-widest uppercase"
+                      >
+                        Positron
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="osm"
+                        className="cursor-pointer rounded-[2px] text-[10px] font-black tracking-widest uppercase"
+                      >
+                        OSM
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="satellite"
+                        className="cursor-pointer rounded-[2px] text-[10px] font-black tracking-widest uppercase"
+                      >
+                        {dict.layers.satellite}
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-          {/* Properties Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    showProperties: !prev.showProperties,
-                  }))
-                }
-                className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-foreground shadow-lg backdrop-blur-md transition-all hover:bg-glass/80"
-              >
-                <MapPin
-                  className={`size-5 ${settings.showProperties ? "text-active-icon" : "text-muted-foreground"}`}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="left"
-              className="text-[10px] font-bold tracking-widest uppercase"
-            >
-              {dict.layers.properties}
-            </TooltipContent>
-          </Tooltip>
+                {/* Properties Toggle */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={dict.layers.properties}
+                      onClick={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          showProperties: !prev.showProperties,
+                        }))
+                      }
+                      className="flex h-[29px] w-[29px] cursor-pointer items-center justify-center rounded-none bg-transparent p-0 transition-colors hover:bg-muted"
+                    >
+                      <MapPin
+                        className={`size-[15px] ${settings.showProperties ? "text-foreground/80" : "text-muted-foreground/70"}`}
+                      />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    container={mapContainer || undefined}
+                    className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                  >
+                    {dict.layers.properties}
+                  </TooltipContent>
+                </Tooltip>
 
-          {/* Building Layouts Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    showBuildingLayouts: !prev.showBuildingLayouts,
-                  }))
-                }
-                className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-foreground shadow-lg backdrop-blur-md transition-all hover:bg-glass/80"
-              >
-                <LayoutDashboard
-                  className={`size-5 ${settings.showBuildingLayouts ? "text-active-icon" : "text-muted-foreground"}`}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="left"
-              className="text-[10px] font-bold tracking-widest uppercase"
-            >
-              {dict.layers.buildingLayouts}
-            </TooltipContent>
-          </Tooltip>
+                {/* Building Layouts Toggle */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={dict.layers.buildingLayouts}
+                      onClick={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          showBuildingLayouts: !prev.showBuildingLayouts,
+                        }))
+                      }
+                      className="flex h-[29px] w-[29px] cursor-pointer items-center justify-center rounded-none bg-transparent p-0 transition-colors hover:bg-muted"
+                    >
+                      <LayoutDashboard
+                        className={`size-[15px] ${settings.showBuildingLayouts ? "text-foreground/80" : "text-muted-foreground/70"}`}
+                      />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    container={mapContainer || undefined}
+                    className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                  >
+                    {dict.layers.buildingLayouts}
+                  </TooltipContent>
+                </Tooltip>
 
-          {/* Clustering Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    clusteringEnabled: !prev.clusteringEnabled,
-                  }))
-                }
-                className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-foreground shadow-lg backdrop-blur-md transition-all hover:bg-glass/80"
-              >
-                <Target
-                  className={`size-5 ${settings.clusteringEnabled ? "text-active-icon" : "text-muted-foreground"}`}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="left"
-              className="text-[10px] font-bold tracking-widest uppercase"
-            >
-              {dict.dashboard?.clustering || "CLUSTERING"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+                {/* Clustering Toggle */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={dict.dashboard?.clustering || "CLUSTERING"}
+                      onClick={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          clusteringEnabled: !prev.clusteringEnabled,
+                        }))
+                      }
+                      className="flex h-[29px] w-[29px] cursor-pointer items-center justify-center rounded-none bg-transparent p-0 transition-colors hover:bg-muted"
+                    >
+                      <Target
+                        className={`size-[15px] ${isClusteringEnabled ? "text-foreground/80" : "text-muted-foreground/70"}`}
+                      />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    container={mapContainer || undefined}
+                    className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                  >
+                    {dict.dashboard?.clustering || "CLUSTERING"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </Map>
       </div>
     </div>
   )

@@ -7,7 +7,7 @@ describe("PropertyDetailsSidebar", () => {
   const mockProperty = {
     id: 1,
     name: "Test Property",
-    address: "123 Test St",
+    address1: "123 Test St",
     localite: "Geneva",
     fondation: "Test Fondation",
     units: 5,

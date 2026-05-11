@@ -4,7 +4,8 @@ export interface Property {
   fondation?: string | null
   localite?: string | null
   zip?: string | null
-  address: string
+  address1: string
+  address2?: string | null
   units?: number | null
   group?: string | null
   tags?: string[] | null
