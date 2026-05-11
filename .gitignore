@@ -36,4 +36,7 @@ pnpm-debug.log*
 next-env.d.ts
 
 *.db
+.gemini
+.superpowers/
+docs/superpowers/
 
