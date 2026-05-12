@@ -17,22 +17,24 @@ export default async function Page({
 
   // Explicitly map rows to Property objects
   const properties = rs.rows.map((row) => {
-    const p: any = {
-      id: row.id,
-      name: row.name,
-      fondation: row.fondation,
-      localite: row.localite,
-      zip: row.zip,
-      address1: row.address1,
-      address2: row.address2,
-      units: row.units,
-      group: row.group,
-      url: row.url,
-      lat: row.lat,
-      lng: row.lng,
-      geometry: row.geometry,
-      construction_year: row.construction_year,
-      scraped_at: row.scraped_at,
+    const p: Property = {
+      id: row.id as number,
+      name: row.name as string | null,
+      fondation: row.fondation as string | null,
+      localite: row.localite as string | null,
+      zip: row.zip as string | null,
+      address1: row.address1 as string,
+      address2: row.address2 as string | null,
+      units: row.units as number | null,
+      group: row.group as string | null,
+      url: row.url as string,
+      lat: row.lat as number | null,
+      lng: row.lng as number | null,
+      geometry: row.geometry as string | null,
+      construction_year: row.construction_year as number | null,
+      scraped_at: row.scraped_at as string,
+      images: [],
+      tags: [],
     }
 
     // Parse JSON columns
@@ -56,7 +58,7 @@ export default async function Page({
       p.tags = (row.tags as string[]) || []
     }
 
-    return p as Property
+    return p
   })
 
   return <DashboardClient initialProperties={properties} dict={dict} />

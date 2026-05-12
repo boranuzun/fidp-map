@@ -48,9 +48,8 @@ describe("MapSidebar", () => {
     expect(sidebar).toHaveClass("md:bottom-4")
     expect(sidebar).toHaveClass("md:w-[400px]")
 
-    expect(sidebar).toHaveClass("bg-glass")
-    expect(sidebar).toHaveClass("backdrop-blur-md")
-    expect(sidebar).toHaveClass("border-glass-border")
+    expect(sidebar).toHaveClass("bg-background")
+    expect(sidebar).toHaveClass("border-border")
 
     // Verify search input
     const searchInput = screen.getByPlaceholderText("SEARCH PROPERTIES...")
