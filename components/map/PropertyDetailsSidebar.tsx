@@ -25,7 +25,7 @@ export default function PropertyDetailsSidebar({
   return (
     <aside
       role="complementary"
-      className="fixed top-4 right-4 bottom-4 z-50 flex w-[calc(100%-2rem)] animate-in flex-col overflow-hidden rounded-[4px] border border-glass-border bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all duration-500 ease-in-out fade-in slide-in-from-right-8 md:absolute md:w-[450px]"
+      className="fixed top-4 right-4 bottom-4 z-50 flex w-[calc(100%-2rem)] animate-in flex-col overflow-hidden rounded-[4px] border border-border bg-background shadow-[0_0_0_2px_rgba(0,0,0,0.1)] transition-all duration-500 ease-in-out fade-in slide-in-from-right-8 md:absolute md:w-[450px]"
     >
       <div className="absolute top-4 right-4 z-10">
         <Button

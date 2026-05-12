@@ -32,7 +32,7 @@ export default function MapSidebar({
   return (
     <aside
       role="complementary"
-      className="fixed inset-x-4 bottom-4 z-50 flex animate-in flex-col overflow-hidden rounded-[4px] border border-glass-border bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md transition-all duration-500 ease-in-out fade-in slide-in-from-left-8 md:absolute md:top-4 md:bottom-4 md:left-4 md:w-[400px]"
+      className="fixed inset-x-4 bottom-4 z-50 flex animate-in flex-col overflow-hidden rounded-[4px] border border-border bg-background shadow-[0_0_0_2px_rgba(0,0,0,0.1)] transition-all duration-500 ease-in-out fade-in slide-in-from-left-8 md:absolute md:top-4 md:bottom-4 md:left-4 md:w-[400px]"
     >
       {/* Sidebar Header (Logo, etc) */}
       {header && <div className="px-4 pt-4 pb-2">{header}</div>}
@@ -40,13 +40,13 @@ export default function MapSidebar({
       {/* Search Bar */}
       <div className="flex items-center gap-2 p-4">
         <div className="group relative flex-1">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-foreground/50 transition-colors group-focus-within:text-foreground" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-foreground/60 transition-colors group-focus-within:text-foreground" />
           <Input
             placeholder={dictionary.dashboard?.searchPlaceholder}
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className="h-12 rounded-[4px] border-border/50 bg-background/80 pl-10 text-sm font-medium transition-all placeholder:text-muted-foreground/50 focus:border-foreground/40 focus:bg-background dark:border-transparent dark:bg-black/40"
-          />{" "}
+            className="h-12 rounded-[4px] border-border/50 bg-muted pl-10 text-sm font-medium transition-all placeholder:text-muted-foreground focus:border-foreground/40 focus:bg-background dark:border-white/10 dark:bg-white/10 dark:placeholder:text-white/40"
+          />
         </div>
         <Button
           variant="outline"
@@ -56,7 +56,7 @@ export default function MapSidebar({
           className={`h-12 w-12 rounded-[4px] border-border transition-all ${
             showFilters || isFiltered
               ? "bg-foreground text-background hover:bg-foreground/90"
-              : "bg-transparent hover:bg-muted"
+              : "bg-muted hover:bg-muted/80 dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/20"
           }`}
         >
           <SlidersHorizontal className="h-5 w-5" />
@@ -66,7 +66,7 @@ export default function MapSidebar({
       {/* Filters Panel */}
       {(showFilters || isFiltered) && filters && (
         <div className="animate-in space-y-3 px-4 pb-4 duration-200 fade-in slide-in-from-top-2">
-          <div className="space-y-4 rounded-[4px] border border-border bg-header p-4">
+          <div className="space-y-4 rounded-[4px] border border-border bg-muted/30 p-4">
             {filters}
             <Button
               variant="ghost"

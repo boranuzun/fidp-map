@@ -193,10 +193,10 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute z-10 touch-manipulation rounded-none border-2 border-foreground bg-background transition-none hover:bg-foreground hover:text-background",
+        "absolute z-10 touch-manipulation rounded-[4px] border border-border bg-background shadow-lg transition-all hover:bg-muted active:scale-95",
         orientation === "horizontal"
-          ? "top-1/2 left-4 -translate-y-1/2"
-          : "top-4 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 left-4 -translate-y-1/2!"
+          : "top-4 left-1/2 -translate-x-1/2! rotate-90",
         className
       )}
       disabled={!canScrollPrev}
@@ -206,7 +206,7 @@ function CarouselPrevious({
       }}
       {...props}
     >
-      <ChevronLeftIcon />
+      <ChevronLeftIcon className="size-4" />
       <span className="sr-only">Previous slide</span>
     </Button>
   )
@@ -226,10 +226,10 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute z-10 touch-manipulation rounded-none border-2 border-black bg-white transition-none hover:bg-black hover:text-white",
+        "absolute z-10 touch-manipulation rounded-[4px] border border-border bg-background shadow-lg transition-all hover:bg-muted active:scale-95",
         orientation === "horizontal"
-          ? "top-1/2 right-4 -translate-y-1/2"
-          : "bottom-4 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 right-4 -translate-y-1/2!"
+          : "bottom-4 left-1/2 -translate-x-1/2! rotate-90",
         className
       )}
       disabled={!canScrollNext}
@@ -239,7 +239,7 @@ function CarouselNext({
       }}
       {...props}
     >
-      <ChevronRightIcon />
+      <ChevronRightIcon className="size-4" />
       <span className="sr-only">Next slide</span>
     </Button>
   )

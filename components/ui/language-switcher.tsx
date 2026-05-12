@@ -37,7 +37,7 @@ export default function LanguageSwitcher({
       <DropdownMenu.Trigger asChild>
         <button
           aria-label={dict.common.language}
-          className="flex cursor-pointer items-center gap-2 rounded-xl border border-glass-border bg-glass px-3 py-2 text-[10px] font-black tracking-widest uppercase shadow-lg backdrop-blur-md transition-all hover:bg-card-hover focus:outline-none"
+          className="flex cursor-pointer items-center gap-2 rounded-[4px] border border-border bg-background px-3 py-2 text-[10px] font-black tracking-widest uppercase shadow-lg transition-all hover:bg-muted focus:outline-none"
         >
           <Globe className="h-3.5 w-3.5" />
           <span>{currentLang.toUpperCase()}</span>
@@ -49,7 +49,7 @@ export default function LanguageSwitcher({
         <DropdownMenu.Content
           align="end"
           sideOffset={8}
-          className="z-50 min-w-[120px] animate-in overflow-hidden rounded-xl border border-glass-border bg-glass shadow-2xl backdrop-blur-xl duration-200 zoom-in-95 fade-in"
+          className="z-50 min-w-[120px] animate-in overflow-hidden rounded-[4px] border border-border bg-background shadow-2xl duration-200 zoom-in-95 fade-in"
         >
           <DropdownMenu.Item
             onSelect={() => handleLanguageChange("fr")}

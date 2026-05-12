@@ -21,7 +21,7 @@ import { Label } from "./ui/label"
 import MapSidebar from "./map/MapSidebar"
 import PropertyDetailsSidebar from "./map/PropertyDetailsSidebar"
 import { type Property } from "./PropertyMap"
-import { Building2, MapPin, Globe, Layers } from "lucide-react"
+import { Building2, MapPin, Globe, Layers, Info } from "lucide-react"
 import logo from "../public/fidp-logo.webp"
 
 const MapPlaceholder = () => {
@@ -280,10 +280,10 @@ export default function DashboardClient({
               <ModeToggle />
               <Link
                 href={`/${lang}/about`}
-                className="flex size-9 cursor-pointer items-center justify-center rounded-xl border border-glass-border bg-glass text-lg font-medium shadow-lg backdrop-blur-md transition-all hover:bg-muted"
+                className="flex size-9 cursor-pointer items-center justify-center rounded-[4px] border border-border bg-background text-foreground shadow-lg transition-all hover:bg-muted"
                 title={dict.common.about}
               >
-                ?
+                <Info className="size-4" />
               </Link>
             </div>
           </div>
@@ -326,8 +326,8 @@ export default function DashboardClient({
           </div>
         }
       >
-        <div className="divide-y divide-border">
-          <div className="flex items-center justify-between bg-header px-6 py-3">
+        <div className="divide-y divide-border bg-background">
+          <div className="flex items-center justify-between border-b border-border bg-muted/50 px-6 py-3">
             <h2 className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
               {filtered.length}{" "}
               {dict.dashboard.propertiesCount.split("{count}")[1].trim() ||
@@ -336,10 +336,10 @@ export default function DashboardClient({
           </div>
 
           {filtered.length > 0 ? (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-border bg-background">
               {Object.entries(groupedProperties).map(
                 ([groupName, groupItems]) => (
-                  <div key={groupName}>
+                  <div key={groupName} className="bg-background">
                     {groupByLocalite && (
                       <div className="sticky top-0 z-10 flex items-center gap-2 border-y border-border bg-header/90 px-5 py-2 backdrop-blur-sm">
                         <Layers className="h-3 w-3 text-muted-foreground" />
@@ -351,7 +351,7 @@ export default function DashboardClient({
                         </div>
                       </div>
                     )}
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border bg-background">
                       {groupItems.map(renderPropertyCard)}
                     </div>
                   </div>
@@ -359,7 +359,7 @@ export default function DashboardClient({
               )}
             </div>
           ) : (
-            <div className="p-12 text-center">
+            <div className="bg-background p-12 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                 <Globe className="h-6 w-6 text-muted-foreground/40" />
               </div>

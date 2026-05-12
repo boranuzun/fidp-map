@@ -331,6 +331,20 @@ export default function MapLibreMap({
 
   const isClusteringEnabled = settings.clusteringEnabled ?? true
 
+  const currentTheme = useMemo(() => {
+    const validThemes: MapTheme[] = [
+      "liberty",
+      "bright",
+      "positron",
+      "satellite",
+      "osm",
+    ]
+    if (settings.mapTheme && validThemes.includes(settings.mapTheme)) {
+      return settings.mapTheme
+    }
+    return MAP_THEME
+  }, [settings.mapTheme])
+
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Offset MapLibre controls to clear the 400px sidebar, but only when not in fullscreen */}
@@ -407,11 +421,11 @@ export default function MapLibreMap({
             "unclustered-point",
           ]}
           mapStyle={
-            settings.mapTheme === "satellite"
+            currentTheme === "satellite"
               ? (SATELLITE_STYLE as maplibregl.StyleSpecification)
-              : settings.mapTheme === "osm"
+              : currentTheme === "osm"
                 ? (OSM_STYLE as maplibregl.StyleSpecification)
-                : `https://tiles.openfreemap.org/styles/${settings.mapTheme || MAP_THEME}`
+                : `https://tiles.openfreemap.org/styles/${currentTheme}`
           }
           onClick={onMapClick}
           onMouseEnter={onMouseEnter}
@@ -657,7 +671,7 @@ export default function MapLibreMap({
 
           {/* Custom Map Controls - Placed inside Map to survive fullscreen */}
           <div className="custom-map-controls pointer-events-none">
-            <div className="pointer-events-auto flex w-[29px] flex-col divide-y divide-border/50 overflow-hidden rounded-[4px] bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md">
+            <div className="pointer-events-auto flex w-[29px] flex-col divide-y divide-border/50 overflow-hidden rounded-[4px] bg-background shadow-[0_0_0_2px_rgba(0,0,0,0.1)]">
               <TooltipProvider>
                 {/* Theme Selector */}
                 <DropdownMenu>
@@ -677,7 +691,7 @@ export default function MapLibreMap({
                     <TooltipContent
                       side="right"
                       container={mapContainer || undefined}
-                      className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                      className="rounded-[4px] border border-border bg-background px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-lg"
                     >
                       {dict.layers.style}
                     </TooltipContent>
@@ -687,7 +701,7 @@ export default function MapLibreMap({
                     align="start"
                     sideOffset={12}
                     container={mapContainer || undefined}
-                    className="rounded-[4px] border-none bg-glass shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                    className="rounded-[4px] border border-border bg-background shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={settings.mapTheme || MAP_THEME}
@@ -755,7 +769,7 @@ export default function MapLibreMap({
                   <TooltipContent
                     side="right"
                     container={mapContainer || undefined}
-                    className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                    className="rounded-[4px] border border-border bg-background px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-lg"
                   >
                     {dict.layers.properties}
                   </TooltipContent>
@@ -784,7 +798,7 @@ export default function MapLibreMap({
                   <TooltipContent
                     side="right"
                     container={mapContainer || undefined}
-                    className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                    className="rounded-[4px] border border-border bg-background px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-lg"
                   >
                     {dict.layers.buildingLayouts}
                   </TooltipContent>
@@ -813,7 +827,7 @@ export default function MapLibreMap({
                   <TooltipContent
                     side="right"
                     container={mapContainer || undefined}
-                    className="rounded-[4px] border-none bg-glass px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-[0_0_0_2px_rgba(0,0,0,0.1)] backdrop-blur-md"
+                    className="rounded-[4px] border border-border bg-background px-2 py-1 text-[10px] font-bold tracking-widest text-foreground uppercase shadow-lg"
                   >
                     {dict.dashboard?.clustering || "CLUSTERING"}
                   </TooltipContent>

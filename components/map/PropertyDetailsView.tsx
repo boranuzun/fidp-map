@@ -111,24 +111,24 @@ export default function PropertyDetailsView({
 
         {/* Title Overlay */}
         <div className="pointer-events-none absolute right-8 bottom-8 left-8">
-          <h3 className="text-3xl leading-tight font-black tracking-tighter text-foreground uppercase drop-shadow-sm">
+          <h3 className="text-3xl leading-tight font-black tracking-tighter text-foreground uppercase drop-shadow-md">
             {property.name || property.address1}
           </h3>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto bg-background p-8">
         <section className="space-y-6">
           <div>
-            <div className="text-lg leading-tight font-black uppercase">
+            <div className="text-xl leading-tight font-black uppercase">
               {property.address1}
             </div>
             {property.address2 && (
-              <div className="mt-1 text-lg leading-tight font-black uppercase">
+              <div className="mt-1 text-xl leading-tight font-black uppercase">
                 {property.address2}
               </div>
             )}
-            <div className="mt-2 text-sm font-bold tracking-wide text-muted-foreground uppercase">
+            <div className="mt-2 text-sm font-bold tracking-wide text-foreground/60 uppercase">
               {property.zip} {property.localite}
             </div>
           </div>
