@@ -26,7 +26,7 @@ jobs:
         run: npm run lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Run tests
         run: npm test
@@ -34,6 +34,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          TURSO_DATABASE_URL: "file:fidp.db"
-          # Mock token for build time if needed
-          TURSO_AUTH_TOKEN: "mock"
+          # Use a dummy remote URL to force Next.js to treat the DB as dynamic
+          # and skip pre-rendering attempts during the CI build
+          TURSO_DATABASE_URL: "libsql://dummy.turso.io"
+          TURSO_AUTH_TOKEN: "dummy-token"

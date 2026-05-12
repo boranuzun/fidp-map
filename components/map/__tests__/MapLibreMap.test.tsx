@@ -88,28 +88,8 @@ vi.mock("react-map-gl/maplibre", async () => {
       <div data-testid={`mock-source-${id}`}>{children}</div>
     ),
     Layer: (props: any) => {
-      const {
-        id,
-        type,
-        paint,
-        layout,
-        filter,
-        source,
-        "source-layer": sourceLayer,
-        minzoom,
-      } = props
-      return (
-        <div
-          data-testid={`mock-layer-${id}`}
-          data-type={type}
-          paint={paint}
-          layout={layout}
-          filter={filter}
-          source={source}
-          source-layer={sourceLayer}
-          minzoom={minzoom}
-        />
-      )
+      const { id, type } = props
+      return <div data-testid={`mock-layer-${id}`} data-type={type} />
     },
     useMap: vi.fn(),
     GeolocateControl: () => <div data-testid="mock-geolocate-control" />,

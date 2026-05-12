@@ -45,7 +45,7 @@ export default async function Page({
         p.images = []
       }
     } else {
-      p.images = (row.images as string[]) || []
+      p.images = (row.images as unknown as string[]) || []
     }
 
     if (typeof row.tags === "string") {
@@ -55,7 +55,7 @@ export default async function Page({
         p.tags = []
       }
     } else {
-      p.tags = (row.tags as string[]) || []
+      p.tags = (row.tags as unknown as string[]) || []
     }
 
     return p
